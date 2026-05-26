@@ -3,6 +3,7 @@ const menuButton = document.querySelector(".menu-toggle");
 const navLinks = document.querySelectorAll(".nav-links a");
 const revealItems = document.querySelectorAll(".reveal");
 const observedSections = document.querySelectorAll("main section[id]");
+const quiz = document.querySelector("[data-quiz]");
 
 let lastScrollY = window.scrollY;
 
@@ -66,6 +67,102 @@ const sectionObserver = new IntersectionObserver(
 );
 
 observedSections.forEach((section) => sectionObserver.observe(section));
+
+if (quiz) {
+    const startScreen = quiz.querySelector("[data-quiz-start]");
+    const beginButton = quiz.querySelector("[data-quiz-begin]");
+    const flow = quiz.querySelector("[data-quiz-flow]");
+    const steps = [...quiz.querySelectorAll("[data-quiz-step]")];
+    const finalScreen = quiz.querySelector("[data-quiz-final]");
+    const progress = quiz.querySelector("[data-quiz-progress]");
+    const counter = quiz.querySelector("[data-quiz-counter]");
+    const selectedLabel = quiz.querySelector("[data-quiz-selected]");
+    const summary = quiz.querySelector("[data-quiz-summary]");
+    const whatsappButton = quiz.querySelector("[data-quiz-whatsapp]");
+    const questions = [
+        "Meu problema principal é",
+        "Urgência do caso",
+        "Documentos",
+        "Preferência de atendimento",
+    ];
+    const answers = [];
+
+    function setProgress(stepIndex) {
+        const progressValue = Math.round((stepIndex / steps.length) * 100);
+        progress.style.width = `${progressValue}%`;
+    }
+
+    function showStep(stepIndex) {
+        steps.forEach((step, index) => {
+            const isCurrent = index === stepIndex;
+            step.hidden = !isCurrent;
+            step.classList.toggle("is-active", isCurrent);
+        });
+
+        counter.textContent = `Etapa ${stepIndex + 1} de ${steps.length}`;
+        selectedLabel.textContent = "Selecione uma opção";
+        setProgress(stepIndex);
+    }
+
+    function buildWhatsappUrl() {
+        const message = `Olá, Dr. Alexandre. Preenchi o diagnóstico jurídico no site.
+
+Meu problema principal é: ${answers[0]}
+Urgência do caso: ${answers[1]}
+Documentos: ${answers[2]}
+Preferência de atendimento: ${answers[3]}
+
+Gostaria de uma análise do meu caso.`;
+
+        return `https://wa.me/5532988480180?text=${encodeURIComponent(message)}`;
+    }
+
+    function finishQuiz() {
+        steps.forEach((step) => {
+            step.hidden = true;
+            step.classList.remove("is-active");
+        });
+
+        counter.textContent = "Concluído";
+        selectedLabel.textContent = "Pronto para envio";
+        progress.style.width = "100%";
+        finalScreen.hidden = false;
+        finalScreen.style.animation = "quizFade 260ms ease both";
+
+        summary.innerHTML = questions
+            .map((question, index) => `<div class="quiz-summary-row"><strong>${question}</strong><span>${answers[index]}</span></div>`)
+            .join("");
+
+        whatsappButton.href = buildWhatsappUrl();
+    }
+
+    beginButton.addEventListener("click", () => {
+        startScreen.hidden = true;
+        flow.hidden = false;
+        finalScreen.hidden = true;
+        showStep(0);
+    });
+
+    steps.forEach((step, stepIndex) => {
+        step.querySelectorAll("[data-answer]").forEach((button) => {
+            button.addEventListener("click", () => {
+                answers[stepIndex] = button.dataset.answer;
+                selectedLabel.textContent = button.dataset.answer;
+                step.querySelectorAll("[data-answer]").forEach((option) => option.classList.remove("is-selected"));
+                button.classList.add("is-selected");
+
+                window.setTimeout(() => {
+                    if (stepIndex === steps.length - 1) {
+                        finishQuiz();
+                        return;
+                    }
+
+                    showStep(stepIndex + 1);
+                }, 180);
+            });
+        });
+    });
+}
 
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {

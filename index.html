@@ -19,6 +19,9 @@
     <meta property="og:url" content="https://rural.alexandrepuchettiadv.com.br">
     <meta property="og:image" content="https://rural.alexandrepuchettiadv.com.br/imagem/DR.ALEXANDRE.jpeg">
 
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,7 +34,9 @@
     <header class="site-header">
         <nav class="navbar" aria-label="Navegação principal">
             <a class="brand" href="#inicio" aria-label="Dr. Alexandre Puchetti Advocacia">
-                <span class="brand-mark">AP</span>
+                <span class="brand-mark">
+                    <img src="imagem/advocacia-icon.png" alt="">
+                </span>
                 <span>
                     <strong>Dr. Alexandre Puchetti</strong>
                     <small>Advocacia Especializada</small>
@@ -109,6 +114,89 @@
                     <h3>Proteção Patrimonial</h3>
                     <p>Atuação voltada à preservação de bens essenciais, pequena propriedade rural, máquinas e estrutura produtiva familiar.</p>
                 </a>
+            </div>
+        </section>
+
+        <section class="diagnostic section-dark" id="diagnostico">
+            <div class="section-heading reveal">
+                <span class="eyebrow">Triagem estratégica</span>
+                <h2>Diagnóstico Jurídico Inteligente</h2>
+                <p>Responda algumas perguntas rápidas para direcionarmos melhor o seu atendimento.</p>
+            </div>
+
+            <div class="quiz-card reveal" data-quiz>
+                <div class="quiz-progress" aria-hidden="true">
+                    <span data-quiz-progress></span>
+                </div>
+
+                <div class="quiz-start" data-quiz-start>
+                    <span class="quiz-step-label">Análise inicial</span>
+                    <h3>Direcione seu caso em poucos segundos.</h3>
+                    <p>As respostas ajudam o escritório a entender o tema, a urgência e o melhor caminho para o primeiro contato.</p>
+                    <button class="btn btn-primary" type="button" data-quiz-begin>Começar análise</button>
+                </div>
+
+                <div class="quiz-flow" data-quiz-flow hidden>
+                    <div class="quiz-topline">
+                        <span data-quiz-counter>Etapa 1 de 4</span>
+                        <strong data-quiz-selected>Selecione uma opção</strong>
+                    </div>
+
+                    <div class="quiz-step is-active" data-quiz-step data-step-index="0">
+                        <h3>Qual é o tipo principal do seu problema?</h3>
+                        <div class="quiz-options">
+                            <button type="button" data-answer="Direito à Saúde">Direito à Saúde</button>
+                            <button type="button" data-answer="Direito do Consumidor">Direito do Consumidor</button>
+                            <button type="button" data-answer="Direito de Família">Direito de Família</button>
+                            <button type="button" data-answer="Direito Bancário">Direito Bancário</button>
+                            <button type="button" data-answer="Direito Civil">Direito Civil</button>
+                            <button type="button" data-answer="Direito Sucessório">Direito Sucessório</button>
+                            <button type="button" data-answer="Usucapião">Usucapião</button>
+                            <button type="button" data-answer="Direito Previdenciário">Direito Previdenciário</button>
+                            <button type="button" data-answer="Advocacia Extrajudicial">Advocacia Extrajudicial</button>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-quiz-step data-step-index="1" hidden>
+                        <h3>Qual é a urgência do seu caso?</h3>
+                        <div class="quiz-options">
+                            <button type="button" data-answer="Preciso resolver imediatamente">Preciso resolver imediatamente</button>
+                            <button type="button" data-answer="Tenho prazo judicial ou administrativo">Tenho prazo judicial ou administrativo</button>
+                            <button type="button" data-answer="Quero apenas uma orientação inicial">Quero apenas uma orientação inicial</button>
+                            <button type="button" data-answer="Quero prevenir problemas futuros">Quero prevenir problemas futuros</button>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-quiz-step data-step-index="2" hidden>
+                        <h3>Você já possui documentos relacionados ao caso?</h3>
+                        <div class="quiz-options">
+                            <button type="button" data-answer="Sim, tenho documentos">Sim, tenho documentos</button>
+                            <button type="button" data-answer="Tenho alguns documentos">Tenho alguns documentos</button>
+                            <button type="button" data-answer="Ainda não tenho documentos">Ainda não tenho documentos</button>
+                            <button type="button" data-answer="Não sei quais documentos preciso">Não sei quais documentos preciso</button>
+                        </div>
+                    </div>
+
+                    <div class="quiz-step" data-quiz-step data-step-index="3" hidden>
+                        <h3>Como prefere ser atendido?</h3>
+                        <div class="quiz-options">
+                            <button type="button" data-answer="WhatsApp">WhatsApp</button>
+                            <button type="button" data-answer="Atendimento presencial">Atendimento presencial</button>
+                            <button type="button" data-answer="Atendimento online">Atendimento online</button>
+                            <button type="button" data-answer="Ainda não sei">Ainda não sei</button>
+                        </div>
+                    </div>
+
+                    <div class="quiz-final" data-quiz-final hidden>
+                        <span class="quiz-step-label">Diagnóstico concluído</span>
+                        <h3>Seu diagnóstico inicial foi concluído.</h3>
+                        <p>Com base nas suas respostas, recomendamos falar diretamente com o advogado para uma análise personalizada.</p>
+                        <div class="quiz-summary" data-quiz-summary></div>
+                        <a class="btn btn-primary" href="https://wa.me/5532988480180" target="_blank" rel="noopener" data-quiz-whatsapp>
+                            Enviar informações pelo WhatsApp
+                        </a>
+                    </div>
+                </div>
             </div>
         </section>
 
