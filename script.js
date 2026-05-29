@@ -80,10 +80,10 @@ if (quiz) {
     const summary = quiz.querySelector("[data-quiz-summary]");
     const whatsappButton = quiz.querySelector("[data-quiz-whatsapp]");
     const questions = [
-        "Meu problema principal é",
-        "Urgência do caso",
-        "Documentos",
-        "Preferência de atendimento",
+        "Situação principal",
+        "Fator que afetou o pagamento",
+        "Relação atual com o banco",
+        "Documentos disponíveis",
     ];
     const answers = [];
 
@@ -105,14 +105,16 @@ if (quiz) {
     }
 
     function buildWhatsappUrl() {
-        const message = `Olá, Dr. Alexandre. Preenchi o diagnóstico jurídico no site.
+        const message = `Olá, gostaria de uma análise sobre possibilidade de alongamento da minha dívida rural.
 
-Meu problema principal é: ${answers[0]}
-Urgência do caso: ${answers[1]}
-Documentos: ${answers[2]}
-Preferência de atendimento: ${answers[3]}
+Preenchi o diagnóstico jurídico no site:
 
-Gostaria de uma análise do meu caso.`;
+Situação principal: ${answers[0]}
+Fator que afetou o pagamento: ${answers[1]}
+Relação atual com o banco: ${answers[2]}
+Documentos disponíveis: ${answers[3]}
+
+Gostaria de uma análise do meu caso rural.`;
 
         return `https://wa.me/5532988480180?text=${encodeURIComponent(message)}`;
     }
