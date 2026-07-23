@@ -355,17 +355,27 @@ summary:focus-visible {
     margin: 0 auto;
 }
 
-.hero-content h1,
+.hero-content h1 {
+    max-width: 900px;
+    color: var(--text);
+    font-size: clamp(2.45rem, 5.4vw, 4.85rem);
+    font-weight: 850;
+    line-height: 1.04;
+    letter-spacing: 0;
+    text-wrap: balance;
+}
+
 .section-heading h2,
 .split-copy h2,
 .about-copy h2,
 .contact-copy h2,
 .service-hero h1 {
-    max-width: 900px;
+    max-width: 820px;
     color: var(--text);
-    font-size: clamp(2.55rem, 6vw, 5.7rem);
+    font-size: clamp(2rem, 3.55vw, 3.45rem);
     font-weight: 850;
-    line-height: 1.02;
+    line-height: 1.08;
+    letter-spacing: 0;
     text-wrap: balance;
 }
 
@@ -434,7 +444,7 @@ summary:focus-visible {
 
 .section-heading h2 {
     margin-inline: auto;
-    font-size: clamp(2rem, 4vw, 4.2rem);
+    font-size: clamp(2rem, 3.4vw, 3.7rem);
 }
 
 .section-heading p {
@@ -574,16 +584,39 @@ summary:focus-visible {
 .about,
 .contact-section {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-columns: minmax(320px, 0.86fr) minmax(420px, 1.14fr);
     align-items: center;
-    gap: 60px;
+    gap: clamp(34px, 5vw, 72px);
     width: min(100%, var(--max));
     margin: 0 auto;
+}
+
+.split-copy,
+.about-copy,
+.contact-copy {
+    min-width: 0;
+}
+
+.split-copy h2,
+.contact-copy h2 {
+    max-width: 560px;
+}
+
+.about-copy h2 {
+    max-width: 600px;
+    font-size: clamp(2.15rem, 4.1vw, 4rem);
+}
+
+.split-copy p,
+.about-copy p,
+.contact-copy p {
+    max-width: 620px;
 }
 
 .guidance-list {
     display: grid;
     gap: 12px;
+    align-self: center;
 }
 
 .guidance-list span {
@@ -597,13 +630,16 @@ summary:focus-visible {
 
 .about-image {
     position: relative;
+    overflow: hidden;
+    border-radius: 8px;
 }
 
 .about-image img {
     width: 100%;
-    aspect-ratio: 4 / 5;
+    height: min(72vh, 720px);
+    min-height: 520px;
     object-fit: cover;
-    object-position: center top;
+    object-position: center 24%;
     border-radius: 8px;
     box-shadow: var(--shadow);
 }
@@ -665,6 +701,15 @@ summary:focus-visible {
 .contact-copy,
 .contact-form {
     padding: clamp(28px, 5vw, 44px);
+}
+
+.contact-section {
+    align-items: start;
+}
+
+.contact-copy h2 {
+    max-width: 500px;
+    font-size: clamp(2rem, 3.4vw, 3.55rem);
 }
 
 .contact-form {
@@ -940,6 +985,27 @@ summary:focus-visible {
     .practice-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .guidance-section,
+    .about,
+    .contact-section {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .split-copy h2,
+    .about-copy h2,
+    .contact-copy h2 {
+        max-width: 760px;
+    }
+
+    .about-image img {
+        width: min(100%, 620px);
+        height: auto;
+        min-height: 0;
+        aspect-ratio: 4 / 5;
+        margin-inline: auto;
+        object-position: center top;
+    }
 }
 
 @media (max-width: 820px) {
@@ -963,6 +1029,20 @@ summary:focus-visible {
     .hero {
         min-height: auto;
         padding: 132px 18px 64px;
+    }
+
+    .hero-content h1 {
+        font-size: clamp(2.2rem, 11vw, 3.4rem);
+        line-height: 1.08;
+    }
+
+    .section-heading h2,
+    .split-copy h2,
+    .about-copy h2,
+    .contact-copy h2,
+    .service-hero h1 {
+        font-size: clamp(1.9rem, 9vw, 2.85rem);
+        line-height: 1.1;
     }
 
     .hero-media {
@@ -1006,10 +1086,24 @@ summary:focus-visible {
         text-align: left;
     }
 
+    .split-copy,
+    .about-copy,
+    .contact-copy {
+        text-align: left;
+    }
+
     .section-heading h2,
     .section-heading p {
         margin-left: 0;
         margin-right: 0;
+    }
+
+    .guidance-list {
+        margin-top: 6px;
+    }
+
+    .about-image {
+        order: -1;
     }
 
     .center-cta {
@@ -1044,9 +1138,16 @@ summary:focus-visible {
         max-width: 178px;
     }
 
-    .hero-content h1,
+    .hero-content h1 {
+        font-size: 2.35rem;
+    }
+
+    .section-heading h2,
+    .split-copy h2,
+    .about-copy h2,
+    .contact-copy h2,
     .service-hero h1 {
-        font-size: 2.25rem;
+        font-size: 2rem;
     }
 
     .practice-card,
