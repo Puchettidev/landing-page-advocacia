@@ -1,27 +1,39 @@
+const WHATSAPP_URL = "https://wa.me/5532988480180";
+const DEFAULT_WHATSAPP_TEXT = "Olá! Encontrei o escritório pelo site e gostaria de mais informações.";
+
 const header = document.querySelector(".site-header");
 const menuButton = document.querySelector(".menu-toggle");
 const navLinks = document.querySelectorAll(".nav-links a");
 const revealItems = document.querySelectorAll(".reveal");
 const observedSections = document.querySelectorAll("main section[id]");
-const quiz = document.querySelector("[data-quiz]");
+const contactForm = document.querySelector("#contactForm");
 
 let lastScrollY = window.scrollY;
 
-function updateHeader() {
-    const currentScroll = window.scrollY;
+function trackEvent(eventName, params = {}) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: eventName, ...params });
+}
 
+function whatsappLink(message = DEFAULT_WHATSAPP_TEXT) {
+    return `${WHATSAPP_URL}?text=${encodeURIComponent(message)}`;
+}
+
+function updateHeader() {
+    if (!header) return;
+
+    const currentScroll = window.scrollY;
     header.classList.toggle("scrolled", currentScroll > 16);
     header.classList.toggle("hidden", currentScroll > lastScrollY && currentScroll > 520);
-
     lastScrollY = currentScroll;
 }
 
 function closeMenu() {
     document.body.classList.remove("menu-open");
-    menuButton.setAttribute("aria-expanded", "false");
+    menuButton?.setAttribute("aria-expanded", "false");
 }
 
-menuButton.addEventListener("click", () => {
+menuButton?.addEventListener("click", () => {
     const isOpen = document.body.classList.toggle("menu-open");
     menuButton.setAttribute("aria-expanded", String(isOpen));
 });
@@ -30,139 +42,104 @@ navLinks.forEach((link) => {
     link.addEventListener("click", closeMenu);
 });
 
-const revealObserver = new IntersectionObserver(
-    (entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("visible");
-                revealObserver.unobserve(entry.target);
-            }
-        });
-    },
-    {
-        threshold: 0.16,
-        rootMargin: "0px 0px -70px 0px",
-    }
-);
+if ("IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        },
+        {
+            threshold: 0.12,
+            rootMargin: "0px 0px -60px 0px",
+        }
+    );
 
-revealItems.forEach((item, index) => {
-    item.style.transitionDelay = `${Math.min(index * 55, 220)}ms`;
-    revealObserver.observe(item);
-});
-
-const sectionObserver = new IntersectionObserver(
-    (entries) => {
-        entries.forEach((entry) => {
-            const link = document.querySelector(`.nav-links a[href="#${entry.target.id}"]`);
-
-            if (entry.isIntersecting && link) {
-                navLinks.forEach((item) => item.classList.remove("active"));
-                link.classList.add("active");
-            }
-        });
-    },
-    {
-        threshold: 0.42,
-    }
-);
-
-observedSections.forEach((section) => sectionObserver.observe(section));
-
-if (quiz) {
-    const startScreen = quiz.querySelector("[data-quiz-start]");
-    const beginButton = quiz.querySelector("[data-quiz-begin]");
-    const flow = quiz.querySelector("[data-quiz-flow]");
-    const steps = [...quiz.querySelectorAll("[data-quiz-step]")];
-    const finalScreen = quiz.querySelector("[data-quiz-final]");
-    const progress = quiz.querySelector("[data-quiz-progress]");
-    const counter = quiz.querySelector("[data-quiz-counter]");
-    const selectedLabel = quiz.querySelector("[data-quiz-selected]");
-    const summary = quiz.querySelector("[data-quiz-summary]");
-    const whatsappButton = quiz.querySelector("[data-quiz-whatsapp]");
-    const questions = [
-        "Situação principal",
-        "Fator que afetou o pagamento",
-        "Relação atual com o banco",
-        "Documentos disponíveis",
-    ];
-    const answers = [];
-
-    function setProgress(stepIndex) {
-        const progressValue = Math.round((stepIndex / steps.length) * 100);
-        progress.style.width = `${progressValue}%`;
-    }
-
-    function showStep(stepIndex) {
-        steps.forEach((step, index) => {
-            const isCurrent = index === stepIndex;
-            step.hidden = !isCurrent;
-            step.classList.toggle("is-active", isCurrent);
-        });
-
-        counter.textContent = `Etapa ${stepIndex + 1} de ${steps.length}`;
-        selectedLabel.textContent = "Selecione uma opção";
-        setProgress(stepIndex);
-    }
-
-    function buildWhatsappUrl() {
-        const message = `Olá, gostaria de uma análise sobre possibilidade de alongamento da minha dívida rural.
-
-Preenchi o diagnóstico jurídico no site:
-
-Situação principal: ${answers[0]}
-Fator que afetou o pagamento: ${answers[1]}
-Relação atual com o banco: ${answers[2]}
-Documentos disponíveis: ${answers[3]}
-
-Gostaria de uma análise do meu caso rural.`;
-
-        return `https://wa.me/5532988480180?text=${encodeURIComponent(message)}`;
-    }
-
-    function finishQuiz() {
-        steps.forEach((step) => {
-            step.hidden = true;
-            step.classList.remove("is-active");
-        });
-
-        counter.textContent = "Concluído";
-        selectedLabel.textContent = "Pronto para envio";
-        progress.style.width = "100%";
-        finalScreen.hidden = false;
-        finalScreen.style.animation = "quizFade 260ms ease both";
-
-        summary.innerHTML = questions
-            .map((question, index) => `<div class="quiz-summary-row"><strong>${question}</strong><span>${answers[index]}</span></div>`)
-            .join("");
-
-        whatsappButton.href = buildWhatsappUrl();
-    }
-
-    beginButton.addEventListener("click", () => {
-        startScreen.hidden = true;
-        flow.hidden = false;
-        finalScreen.hidden = true;
-        showStep(0);
+    revealItems.forEach((item, index) => {
+        item.style.transitionDelay = `${Math.min(index * 35, 180)}ms`;
+        revealObserver.observe(item);
     });
 
-    steps.forEach((step, stepIndex) => {
-        step.querySelectorAll("[data-answer]").forEach((button) => {
-            button.addEventListener("click", () => {
-                answers[stepIndex] = button.dataset.answer;
-                selectedLabel.textContent = button.dataset.answer;
-                step.querySelectorAll("[data-answer]").forEach((option) => option.classList.remove("is-selected"));
-                button.classList.add("is-selected");
+    const sectionObserver = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                const link = document.querySelector(`.nav-links a[href="#${entry.target.id}"]`);
 
-                window.setTimeout(() => {
-                    if (stepIndex === steps.length - 1) {
-                        finishQuiz();
-                        return;
-                    }
-
-                    showStep(stepIndex + 1);
-                }, 180);
+                if (entry.isIntersecting && link) {
+                    navLinks.forEach((item) => item.classList.remove("active"));
+                    link.classList.add("active");
+                }
             });
+        },
+        { threshold: 0.34 }
+    );
+
+    observedSections.forEach((section) => sectionObserver.observe(section));
+} else {
+    revealItems.forEach((item) => item.classList.add("visible"));
+}
+
+document.querySelectorAll(".js-track-whatsapp").forEach((link) => {
+    link.addEventListener("click", () => {
+        trackEvent("whatsapp_click", {
+            link_text: link.textContent.trim(),
+            page_path: window.location.pathname,
         });
+    });
+});
+
+document.querySelectorAll(".js-track-phone").forEach((link) => {
+    link.addEventListener("click", () => {
+        trackEvent("phone_click", { page_path: window.location.pathname });
+    });
+});
+
+if (contactForm) {
+    const status = contactForm.querySelector(".form-status");
+
+    contactForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        status.textContent = "";
+        status.classList.remove("error");
+
+        const formData = new FormData(contactForm);
+
+        if (formData.get("empresa")) {
+            status.textContent = "Não foi possível processar o envio.";
+            status.classList.add("error");
+            return;
+        }
+
+        const nome = String(formData.get("nome") || "").trim();
+        const telefone = String(formData.get("telefone") || "").trim();
+        const email = String(formData.get("email") || "").trim();
+        const area = String(formData.get("area") || "").trim();
+        const descricao = String(formData.get("descricao") || "").trim();
+        const privacidade = formData.get("privacidade");
+
+        if (!nome || !telefone || !area || !descricao || !privacidade) {
+            status.textContent = "Preencha os campos obrigatórios e aceite a Política de Privacidade.";
+            status.classList.add("error");
+            return;
+        }
+
+        const message = `Olá! Encontrei o escritório pelo site e gostaria de mais informações.
+
+Nome: ${nome}
+Telefone: ${telefone}
+E-mail: ${email || "Não informado"}
+Área relacionada: ${area}
+Descrição inicial: ${descricao}
+
+Estou ciente de que o envio desta mensagem não implica contratação automática e que a análise depende dos fatos e documentos do caso.`;
+
+        status.textContent = "Abrindo WhatsApp para envio das informações.";
+        trackEvent("contact_form_whatsapp_submit", { area, page_path: window.location.pathname });
+        window.open(whatsappLink(message), "_blank", "noopener");
     });
 }
 
