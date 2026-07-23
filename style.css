@@ -158,14 +158,14 @@ a {
     overflow: hidden;
     border: 1px solid rgba(215, 181, 109, 0.48);
     border-radius: 50%;
-    background: rgba(215, 181, 109, 0.08);
+    background: #f7f4ec;
     box-shadow: 0 0 38px rgba(215, 181, 109, 0.15);
 }
 
 .brand-mark img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 78%;
+    height: 78%;
+    object-fit: contain;
 }
 
 .brand strong,
@@ -317,8 +317,8 @@ summary:focus-visible {
 .hero {
     position: relative;
     display: grid;
-    min-height: 100svh;
-    padding: 150px 24px 76px;
+    min-height: 96svh;
+    padding: 146px 24px 82px;
     overflow: hidden;
     isolation: isolate;
 }
@@ -329,7 +329,7 @@ summary:focus-visible {
     inset: 0;
     z-index: -2;
     background:
-        linear-gradient(90deg, rgba(3, 16, 12, 0.98) 0%, rgba(3, 16, 12, 0.9) 43%, rgba(3, 16, 12, 0.5) 100%),
+        linear-gradient(90deg, rgba(3, 16, 12, 0.99) 0%, rgba(3, 16, 12, 0.92) 42%, rgba(3, 16, 12, 0.5) 100%),
         linear-gradient(0deg, rgba(3, 16, 12, 1) 0%, transparent 36%);
 }
 
@@ -337,15 +337,15 @@ summary:focus-visible {
     position: absolute;
     inset: 0 0 0 auto;
     z-index: -3;
-    width: min(54vw, 720px);
-    opacity: 0.58;
+    width: min(52vw, 760px);
+    opacity: 0.72;
 }
 
 .hero-media img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center top;
+    object-position: center center;
     filter: saturate(0.88) contrast(1.06);
 }
 
@@ -356,9 +356,9 @@ summary:focus-visible {
 }
 
 .hero-content h1 {
-    max-width: 900px;
+    max-width: 780px;
     color: var(--text);
-    font-size: clamp(2.45rem, 5.4vw, 4.85rem);
+    font-size: clamp(2.5rem, 5vw, 4.55rem);
     font-weight: 850;
     line-height: 1.04;
     letter-spacing: 0;
@@ -397,6 +397,36 @@ summary:focus-visible {
     margin-top: 24px;
 }
 
+.trust-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 26px;
+}
+
+.trust-row span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid rgba(215, 181, 109, 0.24);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.045);
+    color: #e8ede4;
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
+.trust-row span::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 16px rgba(215, 181, 109, 0.42);
+}
+
 .hero-actions {
     display: flex;
     flex-wrap: wrap;
@@ -426,6 +456,8 @@ summary:focus-visible {
 .about,
 .faq,
 .contact-section,
+.office-section,
+.map-section,
 .service-section,
 .legal-page {
     position: relative;
@@ -502,6 +534,12 @@ summary:focus-visible {
     transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
 }
 
+.practice-card {
+    display: flex;
+    min-height: 310px;
+    flex-direction: column;
+}
+
 .value-card:hover,
 .practice-card:hover,
 .step-card:hover,
@@ -534,20 +572,24 @@ summary:focus-visible {
 
 .practice-card span {
     display: grid;
-    width: 54px;
-    height: 54px;
-    margin-bottom: 34px;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 28px;
     place-items: center;
     border: 1px solid rgba(215, 181, 109, 0.3);
     border-radius: 50%;
     background: rgba(47, 107, 63, 0.16);
-    font-size: 1.55rem;
+    color: var(--gold);
+    font-size: 0.92rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
 }
 
 .practice-card a,
 .service-card a {
     display: inline-flex;
-    margin-top: 22px;
+    margin-top: auto;
+    padding-top: 22px;
     color: var(--gold);
     font-weight: 850;
 }
@@ -571,6 +613,30 @@ summary:focus-visible {
     margin: 42px auto 0;
 }
 
+.section-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    width: min(100%, 900px);
+    margin: 48px auto 0;
+    padding: 18px;
+    border: 1px solid rgba(215, 181, 109, 0.22);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.045);
+    box-shadow: var(--shadow);
+}
+
+.section-cta p {
+    color: #e4e9e2;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.section-cta .btn {
+    flex: 0 0 auto;
+}
+
 .legal-note {
     width: min(100%, 900px);
     margin: 38px auto 0;
@@ -578,6 +644,58 @@ summary:focus-visible {
     border: 1px solid rgba(215, 181, 109, 0.22);
     border-radius: 8px;
     background: rgba(215, 181, 109, 0.08);
+}
+
+.office-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 0.75fr 1.15fr;
+    grid-auto-rows: 280px;
+    gap: 16px;
+    width: min(100%, var(--max));
+    margin: 56px auto 0;
+}
+
+.office-photo {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: var(--shadow);
+}
+
+.office-photo-large {
+    grid-row: span 2;
+}
+
+.office-photo-wide {
+    grid-column: span 2;
+}
+
+.office-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 700ms ease, filter 220ms ease;
+}
+
+.office-photo:hover img {
+    transform: scale(1.035);
+    filter: saturate(1.04) contrast(1.02);
+}
+
+.office-photo figcaption {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    background: rgba(3, 12, 9, 0.74);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 850;
+    backdrop-filter: blur(12px);
 }
 
 .guidance-section,
@@ -717,6 +835,52 @@ summary:focus-visible {
     gap: 12px;
 }
 
+.map-section {
+    display: grid;
+    grid-template-columns: minmax(0, 0.65fr) minmax(0, 1.35fr);
+    align-items: stretch;
+    gap: 28px;
+    width: min(100%, var(--max));
+    margin: 0 auto;
+}
+
+.map-copy,
+.map-frame {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.045);
+    box-shadow: var(--shadow);
+}
+
+.map-copy {
+    padding: clamp(28px, 5vw, 44px);
+}
+
+.map-copy h2 {
+    color: var(--text);
+    font-size: clamp(1.8rem, 3vw, 3rem);
+    line-height: 1.1;
+}
+
+.map-copy p {
+    margin-top: 18px;
+    color: var(--muted);
+    line-height: 1.75;
+}
+
+.map-frame {
+    overflow: hidden;
+    min-height: 380px;
+}
+
+.map-frame iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 380px;
+    border: 0;
+    filter: saturate(0.9) contrast(1.04);
+}
+
 .contact-form label {
     color: #e7ece7;
     font-weight: 750;
@@ -843,12 +1007,18 @@ summary:focus-visible {
 
 .site-footer {
     display: grid;
-    gap: 22px;
+    gap: 26px;
     width: min(100%, var(--max));
     margin: 0 auto;
     padding: 54px 24px;
     border-top: 1px solid var(--line);
     color: var(--muted);
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.8fr 1fr;
+    gap: 28px;
 }
 
 .site-footer p {
@@ -860,9 +1030,8 @@ summary:focus-visible {
 }
 
 .footer-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+    display: grid;
+    gap: 9px;
 }
 
 .footer-links a:hover,
@@ -986,10 +1155,26 @@ summary:focus-visible {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .office-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: 260px;
+    }
+
+    .office-photo-large,
+    .office-photo-wide {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
     .guidance-section,
     .about,
-    .contact-section {
+    .contact-section,
+    .map-section {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
     }
 
     .split-copy h2,
@@ -1076,10 +1261,31 @@ summary:focus-visible {
     .practice-grid,
     .steps-grid,
     .service-grid,
+    .office-grid,
     .guidance-section,
     .about,
-    .contact-section {
+    .contact-section,
+    .map-section,
+    .footer-grid {
         grid-template-columns: 1fr;
+    }
+
+    .office-grid {
+        grid-auto-rows: 260px;
+    }
+
+    .section-cta {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .section-cta .btn {
+        width: 100%;
+    }
+
+    .map-frame,
+    .map-frame iframe {
+        min-height: 320px;
     }
 
     .section-heading {
