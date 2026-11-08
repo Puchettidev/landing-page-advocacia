@@ -1,0 +1,14 @@
+{
+  "name": "acp-site-tools",
+  "private": true,
+  "type": "module",
+  "description": "Ferramentas locais para gerar o site estático (não são usadas em produção).",
+  "scripts": {
+    "images": "node images.mjs",
+    "build": "node build.mjs",
+    "serve": "node serve.mjs"
+  },
+  "devDependencies": {
+    "sharp": "0.33.5"
+  }
+}

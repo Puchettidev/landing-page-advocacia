@@ -1,0 +1,64 @@
+{
+  "dr-alexandre": {
+    "width": 1122,
+    "height": 1402,
+    "widths": [
+      480,
+      800,
+      1120
+    ]
+  },
+  "sala-principal": {
+    "width": 1086,
+    "height": 1448,
+    "widths": [
+      480,
+      800,
+      1086
+    ]
+  },
+  "fachada": {
+    "width": 1086,
+    "height": 1448,
+    "widths": [
+      480,
+      800,
+      1086
+    ]
+  },
+  "corredor": {
+    "width": 941,
+    "height": 1672,
+    "widths": [
+      480,
+      800,
+      941
+    ]
+  },
+  "sala-atendimento": {
+    "width": 1448,
+    "height": 1086,
+    "widths": [
+      640,
+      1024,
+      1448
+    ]
+  },
+  "campo-rural": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      800,
+      1280,
+      1600
+    ]
+  },
+  "dr-alexandre-retrato": {
+    "width": 640,
+    "height": 800,
+    "widths": [
+      480,
+      640
+    ]
+  }
+}
