@@ -7,6 +7,7 @@ O site publicado continua 100% estático (HTML/CSS/JS na raiz). Esta pasta só g
 | `site-data.mjs` | **Todo o conteúdo** (textos, áreas, FAQ, contatos). Edite aqui. |
 | `build.mjs` | Gera as 13 páginas `.html`, o `sitemap.xml`, os fundos topográficos e versiona CSS/JS. |
 | `images.mjs` | Converte as fotos de `/imagem` em AVIF/WebP/JPG responsivos em `/assets/img`. |
+| `favicons.mjs` | Gera favicon.ico, ícones PNG, apple-touch-icon e site.webmanifest a partir do logotipo. |
 | `icons.mjs` | Ícones SVG de linha usados nas páginas. |
 | `serve.mjs` | Servidor local para testar. |
 

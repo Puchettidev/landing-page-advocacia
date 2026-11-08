@@ -5,6 +5,7 @@
   "description": "Ferramentas locais para gerar o site estático (não são usadas em produção).",
   "scripts": {
     "images": "node images.mjs",
+    "favicons": "node favicons.mjs",
     "build": "node build.mjs",
     "serve": "node serve.mjs"
   },
