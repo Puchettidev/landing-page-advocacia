@@ -1,6 +1,6 @@
 // Efeitos ligados à rolagem (GSAP + ScrollTrigger): parallax, galeria fixada
 // com rolagem horizontal e linha do tempo que se preenche.
-import { env, $, $$ } from "./env.js?v=d507f9b5f9";
+import { env, $, $$ } from "./env.js?v=115b962aea";
 
 export function initScrollEffects() {
     const gsap = env.gsap;

@@ -12,7 +12,7 @@ export const SITE = {
     phoneHref: "tel:+5532988480180",
     phoneSchema: "+55-32-98848-0180",
     whatsapp: "https://wa.me/5532988480180",
-    hours: "8h às 12h, de segunda a sexta",
+    hours: "8h às 11h30 e 13h às 17h, de segunda a sexta",
     street: "Rua Coronel Marciano Rodrigues, nº 151, Loja 10 B",
     district: "Centro",
     city: "Muriaé",

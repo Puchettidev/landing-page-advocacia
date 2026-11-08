@@ -1,5 +1,5 @@
 // FAQ: acordeão com altura animada, busca e filtros por tema.
-import { env, $, $$, track } from "./env.js?v=d507f9b5f9";
+import { env, $, $$, track } from "./env.js?v=115b962aea";
 
 export function initFaq() {
     $$("[data-faq]").forEach((faq) => {

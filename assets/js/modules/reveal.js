@@ -1,5 +1,5 @@
 // Revela elementos ao entrar na tela (adiciona .is-in). As animações em si estão no CSS.
-import { $$ } from "./env.js?v=d507f9b5f9";
+import { $$ } from "./env.js?v=115b962aea";
 
 export function initReveal() {
     const items = $$("[data-reveal], [data-split]:not([data-split='hero'])");

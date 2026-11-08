@@ -1,6 +1,6 @@
 // Mapa sob demanda, WhatsApp flutuante (horário de atendimento), rastreamento
 // de cliques e transição suave entre páginas.
-import { env, $, $$, track } from "./env.js?v=d507f9b5f9";
+import { env, $, $$, track } from "./env.js?v=115b962aea";
 
 export function initMap() {
     $$("[data-map]").forEach((frame) => {
@@ -25,14 +25,20 @@ export function initMap() {
     });
 }
 
-// Horário: 8h às 12h, segunda a sexta (horário de Brasília)
+// Horário: 8h às 11h30 e 13h às 17h, segunda a sexta (horário de Brasília)
+const PERIODS = [
+    [8 * 60, 11 * 60 + 30],
+    [13 * 60, 17 * 60],
+];
+const HOURS_SHORT = "seg–sex, 8h–11h30 e 13h–17h";
+
 function officeStatus(now = new Date()) {
     const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", weekday: "short", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(now);
     const get = (t) => parts.find((p) => p.type === t)?.value;
     const day = get("weekday");
     const minutes = (Number(get("hour")) % 24) * 60 + Number(get("minute"));
     const weekday = !["Sat", "Sun"].includes(day);
-    return weekday && minutes >= 8 * 60 && minutes < 12 * 60;
+    return weekday && PERIODS.some(([start, end]) => minutes >= start && minutes < end);
 }
 
 export function initWhatsApp() {
@@ -46,8 +52,8 @@ export function initWhatsApp() {
             statusEl.className = "wa-float__status";
             statusEl.style.setProperty("--status", open ? "#1f9d55" : "#b8862b");
             statusEl.textContent = open
-                ? "Em horário de atendimento (seg–sex, 8h–12h)"
-                : "Fora do horário: resposta no próximo período (seg–sex, 8h–12h).";
+                ? `Em horário de atendimento (${HOURS_SHORT})`
+                : `Fora do horário: resposta no próximo período (${HOURS_SHORT}).`;
             hours.append(statusEl);
         }
         // Mostra o aviso uma vez por sessão, sem insistir

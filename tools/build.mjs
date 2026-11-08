@@ -228,7 +228,10 @@ function orgSchema() {
         },
         geo: { "@type": "GeoCoordinates", latitude: SITE.geo.latitude, longitude: SITE.geo.longitude },
         areaServed: { "@type": "City", name: "Muriaé" },
-        openingHoursSpecification: [{ "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "08:00", closes: "12:00" }],
+        openingHoursSpecification: [
+            ["08:00", "11:30"],
+            ["13:00", "17:00"],
+        ].map(([opens, closes]) => ({ "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens, closes })),
         knowsAbout: AREAS.map((a) => a.name),
         employee: { "@type": "Person", name: SITE.lawyer, jobTitle: "Advogado", identifier: SITE.oab },
     };

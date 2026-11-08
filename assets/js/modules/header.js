@@ -1,6 +1,6 @@
 // Header (sólido ao rolar, esconde ao descer), barra de progresso e menu mobile.
-import { $, $$ } from "./env.js?v=d507f9b5f9";
-import { lenis } from "./smooth.js?v=d507f9b5f9";
+import { $, $$ } from "./env.js?v=115b962aea";
+import { lenis } from "./smooth.js?v=115b962aea";
 
 export function initHeader() {
     const header = $("[data-header]");

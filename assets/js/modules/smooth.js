@@ -1,5 +1,5 @@
 // Rolagem suave (Lenis) integrada ao ScrollTrigger + âncoras internas.
-import { env, $$ } from "./env.js?v=d507f9b5f9";
+import { env, $$ } from "./env.js?v=115b962aea";
 
 export let lenis = null;
 
