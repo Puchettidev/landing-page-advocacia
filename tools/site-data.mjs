@@ -2,7 +2,8 @@
 // Regra: apenas informações que já existiam no site. Nada de dados inventados.
 
 export const SITE = {
-    url: "https://rural.alexandrepuchettiadv.com.br",
+    // Domínio canônico (com www). O domínio sem www e o antigo rural.alexandrepuchettiadv.com.br redirecionam (308) para cá na Vercel.
+    url: "https://www.alexandrecampospuchetti.com.br",
     name: "Alexandre Campos Puchetti Advocacia",
     lawyer: "Dr. Alexandre Campos Puchetti",
     oab: "OAB/MG 99.328",

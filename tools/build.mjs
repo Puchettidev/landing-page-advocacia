@@ -869,4 +869,5 @@ ${pages.map((p) => `  <url><loc>${abs(p.file === "index.html" ? "" : p.file)}</l
 </urlset>
 `;
 await writeFile(path.join(root, "sitemap.xml"), sitemap, "utf8");
-console.log(`${pages.length} páginas geradas + sitemap.xml`);
+await writeFile(path.join(root, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${abs("sitemap.xml")}\n`, "utf8");
+console.log(`${pages.length} páginas geradas + sitemap.xml + robots.txt`);
