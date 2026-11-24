@@ -262,6 +262,15 @@ function orgSchema() {
         employee: { "@type": "Person", name: SITE.lawyer, jobTitle: "Advogado", identifier: SITE.oab },
     };
 }
+function websiteSchema() {
+    return { "@context": "https://schema.org", "@type": "WebSite", "@id": `${SITE.url}/#site`, name: SITE.name, alternateName: ["Alexandre Puchetti Advocacia", SITE.lawyer], url: `${SITE.url}/`, inLanguage: "pt-BR", publisher: { "@id": ORG_ID } };
+}
+function lawyerSchema() {
+    return { "@context": "https://schema.org", "@type": "Person", "@id": `${SITE.url}/#advogado`, name: SITE.lawyer, jobTitle: "Advogado", identifier: SITE.oab, url: abs("sobre.html"), image: abs("assets/img/dr-alexandre-retrato-640.jpg"), worksFor: { "@id": ORG_ID }, knowsAbout: AREAS.map((a) => a.name), workLocation: { "@type": "Place", name: `${SITE.city}/${SITE.state}` } };
+}
+function serviceSchema(a) {
+    return { "@context": "https://schema.org", "@type": "Service", "@id": `${abs(`${a.slug}.html`)}#servico`, name: a.name, serviceType: a.name, description: a.metaDescription, url: abs(`${a.slug}.html`), provider: { "@type": "LegalService", "@id": ORG_ID, name: SITE.name }, areaServed: { "@type": "City", name: SITE.city } };
+}
 function faqSchema(items, id) {
     return {
         "@context": "https://schema.org",
@@ -618,11 +627,11 @@ const pages = [];
         bodyClass: "home",
         navKey: "home",
         fullTitle: `${SITE.name} | Advogado em Muriaé/MG`,
-        description: "Advocacia em Muriaé/MG com atuação em Direito Bancário, Defesa do Produtor Rural, Saúde, Previdenciário, Família, Sucessões, Inventário e Mandado de Segurança.",
+        description: "Escritório de advocacia em Muriaé/MG: Direito Bancário, Defesa do Produtor Rural, Saúde, Previdenciário, Família, Inventário e Mandado de Segurança.",
         ogTitle: `${SITE.name} | Advocacia em Muriaé/MG`,
         ogDescription: "Atuação em Direito Bancário, Defesa do Produtor Rural, Saúde, Previdenciário, Família, Sucessões, Inventário e Mandado de Segurança.",
         message: SITE.defaultMessage,
-        jsonld: [orgSchema(), faqSchema(FAQ, `${SITE.url}/#faq`)],
+        jsonld: [websiteSchema(), orgSchema(), faqSchema(FAQ, `${SITE.url}/#faq`)],
         main,
     });
 }
@@ -699,13 +708,13 @@ for (const a of AREAS) {
         bodyClass: `area area-${a.slug}`,
         navKey: "areas",
         title: a.name,
-        fullTitle: `${a.metaTitle} | ${SITE.name}`,
+        fullTitle: a.seoTitle || `${a.metaTitle} | ${SITE.name}`,
         description: a.metaDescription,
         ogTitle: a.name,
         ogDescription: a.ogDescription,
         ogType: "article",
         message: a.message,
-        jsonld: [breadcrumbSchema(crumb, `${a.slug}.html`), faqSchema(faqItems, `${abs(`${a.slug}.html`)}#faq`)],
+        jsonld: [breadcrumbSchema(crumb, `${a.slug}.html`), serviceSchema(a), faqSchema(faqItems, `${abs(`${a.slug}.html`)}#faq`)],
         main,
     });
 }
@@ -716,9 +725,10 @@ pages.push({
     bodyClass: "sobre",
     navKey: "sobre",
     title: "Sobre",
+    fullTitle: `${SITE.lawyer}, Advogado em Muriaé/MG | Sobre`,
     description: `Conheça o escritório ${SITE.name}, sediado em Muriaé/MG, e a atuação do ${SITE.lawyer}, ${SITE.oab}.`,
     message: SITE.defaultMessage,
-    jsonld: [breadcrumbSchema("Sobre", "sobre.html"), orgSchema()],
+    jsonld: [breadcrumbSchema("Sobre", "sobre.html"), orgSchema(), lawyerSchema()],
     main: `
         ${pageHero({
             crumb: "Sobre",
@@ -758,6 +768,7 @@ pages.push({
     bodyClass: "contato",
     navKey: "contato",
     title: "Contato",
+    fullTitle: `Contato | ${SITE.name} em Muriaé/MG`,
     description: `Entre em contato com ${SITE.name} em Muriaé/MG pelo WhatsApp, telefone ou formulário inicial de atendimento.`,
     message: SITE.defaultMessage,
     jsonld: [breadcrumbSchema("Contato", "contato.html"), orgSchema()],
