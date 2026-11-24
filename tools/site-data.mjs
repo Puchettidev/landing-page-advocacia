@@ -32,6 +32,10 @@ export const SITE = {
     sensitiveWarning: "Evite enviar dados médicos, bancários ou documentos sigilosos neste primeiro contato.",
 };
 
+// Data da última alteração relevante das páginas fixas (usada no <lastmod> do sitemap).
+// Atualize somente quando o conteúdo dessas páginas mudar de fato.
+export const PAGES_LASTMOD = "2026-11-24";
+
 export const DIFFERENTIALS = ["Atendimento personalizado", "Análise individual do caso", "Comunicação clara"];
 
 export const VALUES = [
@@ -323,7 +327,7 @@ export const LEGAL_PAGES = [
             ["Finalidade", "Os dados são utilizados para responder contatos, organizar a análise inicial, prestar informações sobre atendimento e cumprir obrigações legais ou regulatórias aplicáveis."],
             ["Dados sensíveis e documentos", "Evite enviar dados médicos, bancários ou documentos sigilosos neste primeiro contato. Caso a análise demande documentos, o envio deve ocorrer por canal adequado e seguro."],
             ["WhatsApp e terceiros", "Ao clicar em links de WhatsApp, o usuário passa a utilizar ambiente externo sujeito às políticas da respectiva plataforma."],
-            ["Cookies e analytics", "O site pode registrar eventos técnicos de navegação e cliques para melhoria de experiência e mensuração, desde que haja configuração apropriada. IDs de ferramentas de analytics devem ser inseridos somente quando confirmados."],
+            ["Cookies e analytics", "Quando ativada, a medição de audiência (Google Analytics 4) somente é carregada após o consentimento do visitante, que pode aceitar ou recusar no aviso exibido no site e alterar a escolha a qualquer momento em “Preferências de cookies”, no rodapé. A medição registra, de forma agregada, páginas visitadas e cliques nos canais de contato, sem envio de nome, telefone, e-mail, termos digitados ou relatos de casos."],
             ["Direitos do titular", "O titular pode solicitar informações, correção, exclusão ou esclarecimentos sobre seus dados pelos canais de contato do escritório."],
             ["Contato", "Telefone e WhatsApp: (32) 98848-0180. Endereço: Rua Coronel Marciano Rodrigues, nº 151, Loja 10 B, Centro, Muriaé/MG, CEP 36880-027."],
         ],

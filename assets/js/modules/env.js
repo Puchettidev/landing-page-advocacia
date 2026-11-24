@@ -15,7 +15,9 @@ export const env = {
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+// Envia um evento ao GA4 somente se o visitante consentiu (ver consent.js).
+// Nunca envie dados pessoais, textos digitados ou conteúdo de consultas jurídicas.
 export function track(event, params = {}) {
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ event, page_path: window.location.pathname, ...params });
+    if (!window.__acpAnalytics || typeof window.gtag !== "function") return;
+    window.gtag("event", event, { page_path: window.location.pathname, ...params });
 }

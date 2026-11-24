@@ -1,6 +1,6 @@
 // Microinterações: botões magnéticos, preenchimento a partir do cursor,
 // tilt 3D + brilho nos cards, painel de serviços dos cards e marquee.
-import { env, $$ } from "./env.js?v=115b962aea";
+import { env, $$ } from "./env.js?v=371857c65f";
 
 export function initButtons() {
     $$(".btn").forEach((btn) => {

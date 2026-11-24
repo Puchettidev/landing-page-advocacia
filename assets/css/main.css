@@ -3087,6 +3087,52 @@ html:not(.js) .mstep__head {
     text-underline-offset: 3px;
 }
 
+.footer-linkbtn {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: inherit;
+    color: inherit;
+    text-align: left;
+}
+
+.footer-linkbtn:hover {
+    color: var(--cream);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Aviso de cookies (LGPD) — exibido somente quando o GA4 está configurado */
+.cookie-consent {
+    position: fixed;
+    left: clamp(12px, 2.5vw, 28px);
+    bottom: clamp(12px, 2.5vw, 28px);
+    z-index: 800;
+    display: grid;
+    gap: 14px;
+    width: min(440px, calc(100% - 24px));
+    padding: 20px 22px;
+    border: 1px solid var(--line-light);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--text);
+    box-shadow: var(--shadow-lg);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.cookie-consent a {
+    color: var(--moss-700);
+    font-weight: 700;
+}
+
+.cookie-consent__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
 .footer-disclaimer {
     padding: 22px 0;
     border-top: 1px solid var(--line-dark);

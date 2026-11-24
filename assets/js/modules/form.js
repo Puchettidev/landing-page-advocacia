@@ -1,6 +1,6 @@
 // Formulário em etapas: área → descrição → contato + LGPD.
 // Ao final monta a mensagem e abre o WhatsApp (nenhum dado é enviado a servidor).
-import { $, $$, track } from "./env.js?v=115b962aea";
+import { $, $$, track } from "./env.js?v=371857c65f";
 
 const WHATSAPP_URL = "https://wa.me/5532988480180";
 

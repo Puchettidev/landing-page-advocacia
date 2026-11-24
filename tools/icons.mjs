@@ -43,7 +43,18 @@ const shapes = {
     chevronRight: [P("m9 18 6-6-6-6")],
     expand: [P("M15 3h6v6"), P("M9 21H3v-6"), P("M21 3l-7 7"), P("M3 21l7-7")],
     mouse: [R(6, 3, 12, 18, 6), P("M12 7v4")],
+    book: [P("M12 7v14"), P("M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3Z")],
+    calendar: [R(3, 4, 18, 18, 2), P("M16 2v4"), P("M8 2v4"), P("M3 10h18")],
+    user: [P("M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"), C(12, 7, 4)],
+    link: [P("M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"), P("M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71")],
+    share: [C(18, 5, 3), C(6, 12, 3), C(18, 19, 3), P("m8.59 13.51 6.83 3.98"), P("m15.41 6.51-6.82 3.98")],
+    list: [P("M8 6h13"), P("M8 12h13"), P("M8 18h13"), P("M3 6h.01"), P("M3 12h.01"), P("M3 18h.01")],
+    scale: [P("m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"), P("m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"), P("M7 21h10"), P("M12 3v18"), P("M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2")],
+    cart: [C(8, 21, 1), C(19, 21, 1), P("M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12")],
 };
+
+// Ícone de cada categoria (pela área vinculada; categorias sem área usam ícones próprios).
+export const CATEGORY_ICONS = { "direito-civil": "scale", "direito-do-consumidor": "cart" };
 
 export function icon(name, { cls = "icon", size = 24, stroke = 1.5, draw = false } = {}) {
     const body = shapes[name];

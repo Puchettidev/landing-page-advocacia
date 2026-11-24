@@ -22,3 +22,19 @@ npm run serve      # abre em http://localhost:5173
 ```
 
 > Não edite os `.html` da raiz à mão: eles são sobrescritos pelo `npm run build`.
+
+## Artigos jurídicos
+
+| Arquivo | Função |
+| --- | --- |
+| `content.mjs` | Lê e valida `content/artigos/*.json`, converte Markdown com segurança e otimiza imagens. |
+| `check.mjs` | Verifica o pacote `/dist` (links, sitemap, canonical, JSON-LD, H1, alt, rascunhos). |
+
+```bash
+npm run build:drafts   # prévia local com rascunhos (noindex)
+npm run build:dist     # pacote de publicação em /dist (o mesmo comando roda na Vercel)
+npm run check          # validação do /dist
+npm run cms            # servidor local do painel /admin
+```
+
+Guia completo (painel, publicação, Vercel, SEO, GA4): [`docs/ARTIGOS.md`](../docs/ARTIGOS.md).

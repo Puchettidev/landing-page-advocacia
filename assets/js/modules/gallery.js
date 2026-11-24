@@ -1,6 +1,6 @@
 // Galeria: arrastar com o mouse (fora do modo fixado) e lightbox acessível.
-import { $, $$ } from "./env.js?v=115b962aea";
-import { lenis } from "./smooth.js?v=115b962aea";
+import { $, $$ } from "./env.js?v=371857c65f";
+import { lenis } from "./smooth.js?v=371857c65f";
 
 export function initGallery() {
     $$("[data-gallery]").forEach((gallery) => {

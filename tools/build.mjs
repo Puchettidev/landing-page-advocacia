@@ -1,20 +1,34 @@
 // Gera as páginas HTML estáticas do site a partir de site-data.mjs.
-// Uso: cd tools && npm run build   (não precisa de dependências)
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+// Uso: cd tools && npm run build
+//   --drafts  inclui rascunhos e agendados (somente para prévia local; páginas com noindex)
+//   --dist    copia apenas os arquivos públicos para /dist (usado no build da Vercel)
+import { readFile, writeFile, mkdir, rm, cp, readdir as readDir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { SITE, AREAS, FAQ, FAQ_CATEGORIES, VALUES, STEPS_HOME, STEPS_ABOUT, GUIDANCE, GALLERY, DIFFERENTIALS, LEGAL_PAGES } from "./site-data.mjs";
-import { icon, WHATSAPP_SVG } from "./icons.mjs";
+import { SITE, AREAS, FAQ, FAQ_CATEGORIES, VALUES, STEPS_HOME, STEPS_ABOUT, GUIDANCE, GALLERY, DIFFERENTIALS, LEGAL_PAGES, PAGES_LASTMOD } from "./site-data.mjs";
+import { icon, WHATSAPP_SVG, CATEGORY_ICONS } from "./icons.mjs";
+import { loadCategories, loadArticles, createRenderer, prepareImage, pictureHtml, readingMinutes, formatDate, isoDate } from "./content.mjs";
+import { Marked } from "marked";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const manifest = JSON.parse(await readFile(path.join(root, "assets/img/manifest.json"), "utf8"));
-const TODAY = new Date().toISOString().slice(0, 10);
+const ARGS = new Set(process.argv.slice(2));
+const WITH_DRAFTS = ARGS.has("--drafts");
+const NOW = new Date();
+// ID de mensuração do GA4: definido por variável de ambiente (Vercel → Settings → Environment Variables).
+const GA_ID = (() => {
+    const id = String(process.env.GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_ID || "").trim();
+    if (!id) return "";
+    if (!/^G-[A-Z0-9]{4,20}$/.test(id)) throw new Error(`GA_MEASUREMENT_ID inválido: "${id}" (formato esperado: G-XXXXXXXXXX)`);
+    return id;
+})();
 
 // Versão = hash do conteúdo de CSS/JS (muda só quando algo muda de fato).
 const { createHash } = await import("node:crypto");
 const { readdir: listDir } = await import("node:fs/promises");
 const assetSources = [
     path.join(root, "assets/css/main.css"),
+    path.join(root, "assets/css/artigos.css"),
     path.join(root, "assets/js/main.js"),
     ...(await listDir(path.join(root, "assets/js/modules"))).filter((f) => f.endsWith(".js")).sort().map((f) => path.join(root, "assets/js/modules", f)),
 ];
@@ -54,6 +68,7 @@ const NAV = [
     { href: "index.html", label: "Início", key: "home" },
     { href: "index.html#areas", label: "Áreas de atuação", key: "areas" },
     { href: "sobre.html", label: "Sobre", key: "sobre" },
+    { href: "artigos/", label: "Artigos", key: "artigos" },
     { href: "index.html#faq", label: "Perguntas frequentes", key: "faq" },
     { href: "contato.html", label: "Contato", key: "contato" },
 ];
@@ -106,6 +121,7 @@ function footer(page) {
                 <nav class="footer-col" aria-label="Institucional"><p class="footer-col__title">Institucional</p><ul>
                     <li><a href="index.html">Início</a></li>
                     <li><a href="sobre.html">Sobre</a></li>
+                    <li><a href="artigos/">Artigos jurídicos</a></li>
                     <li><a href="index.html#faq">Perguntas frequentes</a></li>
                     <li><a href="contato.html">Contato</a></li>
                     <li><a href="sitemap.xml">Mapa do site</a></li>
@@ -119,6 +135,7 @@ function footer(page) {
                     <li><a href="politica-de-privacidade.html">Política de Privacidade</a></li>
                     <li><a href="termos-de-uso.html">Termos de Uso</a></li>
                     <li><a href="aviso-legal.html">Aviso Legal</a></li>
+                    ${GA_ID ? `<li><button type="button" class="footer-linkbtn" data-consent-open>Preferências de cookies</button></li>` : ""}
                 </ul></div>
             </div>
             <p class="footer-disclaimer">${SITE.disclaimer}</p>
@@ -136,17 +153,18 @@ function footer(page) {
 
 function layout(page) {
     const title = page.fullTitle || `${page.title} | ${SITE.name}`;
-    const canonical = abs(page.file === "index.html" ? "" : page.file);
-    const ogImage = abs("assets/img/og-alexandre-campos-puchetti.jpg");
+    const canonical = canonicalOf(page);
+    const og = page.ogImage || { url: abs("assets/img/og-alexandre-campos-puchetti.jpg"), width: 1200, height: 630, alt: `${SITE.lawyer} em seu escritório em Muriaé/MG` };
+    const ogImage = og.url;
     return `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR"${page.fast ? " data-fast" : ""}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     ${page.file === "index.html" ? `<meta name="google-site-verification" content="${SITE.googleVerification}">\n    ` : ""}<title>${esc(title)}</title>
     <meta name="description" content="${esc(page.description)}">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="${SITE.name}">
+    <meta name="robots" content="${page.noindex ? "noindex, follow" : "index, follow, max-image-preview:large"}">
+    <meta name="author" content="${esc(page.author || SITE.name)}">
     <meta name="theme-color" content="#07130f">
     <link rel="canonical" href="${canonical}">
     <meta property="og:locale" content="pt_BR">
@@ -156,10 +174,10 @@ function layout(page) {
     <meta property="og:description" content="${esc(page.ogDescription || page.description)}">
     <meta property="og:url" content="${canonical}">
     <meta property="og:image" content="${ogImage}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="${SITE.lawyer} em seu escritório em Muriaé/MG">
-    <meta name="twitter:card" content="summary_large_image">
+    ${og.width ? `<meta property="og:image:width" content="${og.width}">
+    <meta property="og:image:height" content="${og.height}">
+    ` : ""}<meta property="og:image:alt" content="${esc(og.alt)}">
+    ${page.extraHead || ""}${GA_ID ? `<meta name="ga-measurement-id" content="${GA_ID}">\n    ` : ""}<meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${esc(page.ogTitle || title)}">
     <meta name="twitter:description" content="${esc(page.ogDescription || page.description)}">
     <meta name="twitter:image" content="${ogImage}">
@@ -171,14 +189,15 @@ function layout(page) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Manrope:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="assets/css/main.css?v=${VERSION}">
+    <link rel="stylesheet" href="assets/css/main.css?v=${VERSION}">${page.articlesCss ? `\n    <link rel="stylesheet" href="assets/css/artigos.css?v=${VERSION}">` : ""}
     <script>
         (function () {
             var d = document.documentElement, reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
             d.classList.add("js");
             if (reduce) d.classList.add("reduce-motion");
             try {
-                if (!reduce && !sessionStorage.getItem("acp-visited")) d.classList.add("show-preloader");
+                // Páginas de leitura (data-fast) não exibem a abertura animada, para o texto aparecer de imediato.
+                if (!reduce && !sessionStorage.getItem("acp-visited") && !d.hasAttribute("data-fast")) d.classList.add("show-preloader");
                 else if (!reduce && sessionStorage.getItem("acp-transition")) d.classList.add("page-enter");
                 sessionStorage.removeItem("acp-transition");
                 sessionStorage.setItem("acp-visited", "1");
@@ -206,6 +225,11 @@ ${page.main}
 </body>
 </html>
 `;
+}
+
+function canonicalOf(page) {
+    if (page.urlPath !== undefined) return abs(page.urlPath);
+    return abs(page.file === "index.html" ? "" : page.file);
 }
 
 // ---------- JSON-LD ----------
@@ -779,6 +803,397 @@ for (const l of LEGAL_PAGES) {
     });
 }
 
+// ---------- ARTIGOS JURÍDICOS ----------
+const CATEGORIES = await loadCategories(root);
+const content = await loadArticles(root, { now: NOW, categories: CATEGORIES });
+const ARTICLES = WITH_DRAFTS ? [...content.published, ...content.scheduled, ...content.drafts] : content.published;
+const imageWarnings = [];
+const PER_PAGE = 9;
+const ARTICLES_DESC = "Artigos jurídicos informativos sobre Direito Bancário, Direito do Produtor Rural, Crédito Rural, Saúde, Previdenciário, Família, Sucessões e Consumidor.";
+const isLawyer = (name) => !name || name === SITE.lawyer;
+const categoryIcon = (c) => CATEGORY_ICONS[c?.slug] || areaBySlug[c?.area]?.icon || "book";
+const articleUrl = (a) => `artigos/${a.slug}/`;
+const lastmodOf = (a) => isoDate(a.updated || a.published);
+
+let currentImages = new Map();
+const renderMarkdown = createRenderer({
+    siteUrl: SITE.url,
+    areaSlugs: AREAS.map((a) => a.slug),
+    imageHtml(href, alt, title) {
+        const img = currentImages.get(href);
+        if (!img) return "";
+        return `<figure class="article-figure">${pictureHtml(img, { alt, sizes: "(min-width: 900px) 760px, 92vw" })}${title ? `<figcaption>${esc(title)}</figcaption>` : ""}</figure>`;
+    },
+});
+
+function bodyImageHrefs(markdown) {
+    const m = new Marked({ gfm: true });
+    const hrefs = [];
+    m.walkTokens(m.lexer(String(markdown ?? "")), (t) => t.type === "image" && hrefs.push(t.href));
+    return [...new Set(hrefs)];
+}
+
+for (const a of ARTICLES) {
+    a.url = articleUrl(a);
+    a.cover = await prepareImage(root, a.capa, [480, 800, 1200], imageWarnings);
+    a.social = a.socialImage ? await prepareImage(root, a.socialImage, [1200], imageWarnings) : null;
+    currentImages = new Map();
+    for (const href of bodyImageHrefs(a.corpo)) currentImages.set(href, await prepareImage(root, href, [480, 800, 1200], imageWarnings));
+    const r = renderMarkdown(a.corpo);
+    a.html = r.html.replace(/<p>\s*(<figure class="article-figure">[\s\S]*?<\/figure>)\s*<\/p>/g, "$1");
+    a.headings = r.headings;
+    a.words = r.words;
+    a.minutes = readingMinutes(r.words);
+    a.areaList = [...new Set([a.category?.area, ...a.areas, ...r.areaLinks])].filter((s) => areaBySlug[s]);
+    a.preview = a.status !== "publicado" || a.published > NOW;
+}
+
+function coverMedia(a, { eager = false, sizes = "(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw" } = {}) {
+    if (a.cover) return pictureHtml(a.cover, { alt: a.capaAlt || "", sizes, eager });
+    return `<span class="article-ph" aria-hidden="true"><span class="article-ph__topo"></span>${icon(categoryIcon(a.category), { size: 40, stroke: 1.25 })}</span>`;
+}
+
+function articleCard(a, { featured = false, headingTag = "h3" } = {}) {
+    const date = a.published ? `<time datetime="${a.published.toISOString()}">${formatDate(a.published)}</time>` : "";
+    return `<article class="article-card${featured ? " article-card--featured" : ""}" data-cat="${a.category?.slug || ""}">
+            <a class="article-card__media" href="${a.url}" tabindex="-1" aria-hidden="true">${coverMedia(a, featured ? { sizes: "(min-width: 1024px) 56vw, 92vw" } : {})}</a>
+            <div class="article-card__body">
+                ${a.category ? `<p class="article-card__cat">${esc(a.category.nome)}</p>` : ""}
+                <${headingTag} class="article-card__title"><a href="${a.url}">${esc(a.titulo)}</a></${headingTag}>
+                ${a.resumo ? `<p class="article-card__excerpt">${esc(a.resumo)}</p>` : ""}
+                <p class="article-card__meta"><span>${esc(a.autor || SITE.lawyer)}</span>${date}<span>${a.minutes} min de leitura</span></p>
+                ${a.preview ? `<p class="article-card__draft">Prévia — não publicado</p>` : ""}
+                <a class="article-card__more" href="${a.url}" aria-label="Leia mais: ${esc(a.titulo)}">Leia mais ${icon("arrow", { size: 16 })}</a>
+            </div>
+        </article>`;
+}
+
+function articlesHero({ crumbs, kicker, title, text }) {
+    const items = crumbs.map((c, i) => (i === crumbs.length - 1 ? `<li aria-current="page">${esc(c.label)}</li>` : `<li><a href="${c.href}">${esc(c.label)}</a></li>`)).join("");
+    return `<section class="page-hero articles-hero">
+            <div class="topo topo--dark" aria-hidden="true"></div>
+            <div class="container page-hero__inner">
+                <nav class="breadcrumbs" aria-label="Você está em"><ol>${items}</ol></nav>
+                <p class="kicker">${kicker}</p>
+                <h1>${title}</h1>
+                ${text ? `<p class="page-hero__text">${text}</p>` : ""}
+            </div>
+        </section>`;
+}
+
+function personSchema(name) {
+    if (!isLawyer(name)) return { "@type": "Person", name };
+    return { "@type": "Person", "@id": `${SITE.url}/#advogado`, name: SITE.lawyer, url: abs("sobre.html"), jobTitle: "Advogado", identifier: SITE.oab, worksFor: { "@id": ORG_ID } };
+}
+const publisherSchema = { "@type": "Organization", "@id": ORG_ID, name: SITE.name, url: `${SITE.url}/`, logo: { "@type": "ImageObject", url: abs("assets/img/monograma-trigo.png") } };
+
+// Listagem: /artigos/ e /artigos/pagina/N/
+{
+    const featured = ARTICLES.find((a) => a.destaque) || ARTICLES[0];
+    const rest = ARTICLES.filter((a) => a !== featured);
+    const pagesCount = Math.max(1, Math.ceil(rest.length / PER_PAGE));
+    const usedCats = CATEGORIES.filter((c) => ARTICLES.some((a) => a.category?.slug === c.slug));
+    const empty = ARTICLES.length === 0;
+    for (let n = 1; n <= pagesCount; n++) {
+        const slice = rest.slice((n - 1) * PER_PAGE, n * PER_PAGE);
+        const urlPath = n === 1 ? "artigos/" : `artigos/pagina/${n}/`;
+        const pageHref = (k) => (k === 1 ? "artigos/" : `artigos/pagina/${k}/`);
+        const pager = pagesCount > 1
+            ? `<nav class="pager" aria-label="Paginação dos artigos"><ul>
+                ${n > 1 ? `<li><a class="pager__step" href="${pageHref(n - 1)}" rel="prev">${icon("chevronLeft", { size: 18 })}<span>Anteriores</span></a></li>` : ""}
+                ${Array.from({ length: pagesCount }, (_, i) => i + 1).map((k) => `<li><a class="pager__num" href="${pageHref(k)}"${k === n ? ' aria-current="page"' : ""}>${k}</a></li>`).join("")}
+                ${n < pagesCount ? `<li><a class="pager__step" href="${pageHref(n + 1)}" rel="next"><span>Próximos</span>${icon("chevronRight", { size: 18 })}</a></li>` : ""}
+            </ul></nav>`
+            : "";
+        const controls = empty
+            ? ""
+            : `<div class="articles-controls">
+                <label class="articles-search" for="artigos-busca">
+                    ${icon("search", { size: 20 })}
+                    <span class="visually-hidden">Pesquisar artigos</span>
+                    <input id="artigos-busca" type="search" placeholder="Pesquisar artigos…" autocomplete="off" maxlength="80" data-articles-search>
+                </label>
+                <div class="articles-chips" role="group" aria-label="Filtrar artigos por categoria">
+                    <button type="button" class="chip chip--light" aria-pressed="true" data-articles-filter="">Todas</button>
+                    ${usedCats.map((c) => `<button type="button" class="chip chip--light" aria-pressed="false" data-articles-filter="${c.slug}">${esc(c.nome)}</button>`).join("")}
+                </div>
+                <p class="articles-count" role="status" aria-live="polite" data-articles-count></p>
+            </div>`;
+        const main = `
+        ${articlesHero({
+            crumbs: n === 1 ? [{ href: "index.html", label: "Início" }, { label: "Artigos" }] : [{ href: "index.html", label: "Início" }, { href: "artigos/", label: "Artigos" }, { label: `Página ${n}` }],
+            kicker: "Conteúdo informativo",
+            title: n === 1 ? "Artigos jurídicos" : `Artigos jurídicos — página ${n}`,
+            text: "Textos de caráter informativo e educativo sobre temas jurídicos analisados pelo escritório. As informações não substituem a análise individual de cada caso.",
+        })}
+        <section class="section section--light articles" data-articles>
+            <div class="container">
+                ${controls}
+                <div data-articles-static>
+                    ${empty ? `<div class="articles-empty"><span class="articles-empty__icon">${icon("book", { size: 34, stroke: 1.25 })}</span><h2>Em breve, novos artigos.</h2><p>Os conteúdos estão em elaboração. Enquanto isso, conheça as <a href="index.html#areas">áreas de atuação</a> do escritório.</p></div>` : ""}
+                    ${n === 1 && featured ? `<h2 class="articles-label">${featured.destaque ? "Em destaque" : "Mais recente"}</h2>${articleCard(featured, { featured: true })}` : ""}
+                    ${slice.length ? `<h2 class="articles-label">${n === 1 ? "Artigos recentes" : "Mais artigos"}</h2><div class="articles-grid">${slice.map((a) => articleCard(a)).join("\n")}</div>` : ""}
+                    ${pager}
+                </div>
+                <div class="articles-grid" data-articles-results hidden></div>
+                <div class="articles-pager" data-articles-pager hidden></div>
+                <p class="articles-empty articles-empty--search" data-articles-empty hidden>Nenhum artigo encontrado. Tente outro termo ou escolha outra categoria.</p>
+                <p class="legal-note">${SITE.disclaimer}</p>
+            </div>
+        </section>`;
+        const pageArticles = n === 1 ? [featured, ...slice].filter(Boolean) : slice;
+        pages.push({
+            file: n === 1 ? "artigos/index.html" : `artigos/pagina/${n}/index.html`,
+            urlPath,
+            nested: true,
+            fast: true,
+            articlesCss: true,
+            bodyClass: "artigos",
+            navKey: "artigos",
+            fullTitle: n === 1 ? `Artigos jurídicos | ${SITE.name}` : `Artigos jurídicos — página ${n} | ${SITE.name}`,
+            description: ARTICLES_DESC,
+            message: SITE.defaultMessage,
+            noindex: empty || WITH_DRAFTS,
+            sitemap: n === 1 && !empty,
+            lastmod: empty ? undefined : ARTICLES.map(lastmodOf).sort().at(-1),
+            jsonld: [
+                {
+                    "@context": "https://schema.org",
+                    "@type": "CollectionPage",
+                    "@id": `${abs(urlPath)}#pagina`,
+                    name: "Artigos jurídicos",
+                    description: ARTICLES_DESC,
+                    url: abs(urlPath),
+                    inLanguage: "pt-BR",
+                    isPartOf: { "@type": "WebSite", name: SITE.name, url: `${SITE.url}/` },
+                    publisher: publisherSchema,
+                    mainEntity: { "@type": "ItemList", itemListElement: pageArticles.map((a, i) => ({ "@type": "ListItem", position: i + 1, url: abs(a.url), name: a.titulo })) },
+                },
+                {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    itemListElement: [
+                        { "@type": "ListItem", position: 1, name: "Início", item: `${SITE.url}/` },
+                        { "@type": "ListItem", position: 2, name: "Artigos jurídicos", item: abs("artigos/") },
+                        ...(n > 1 ? [{ "@type": "ListItem", position: 3, name: `Página ${n}`, item: abs(urlPath) }] : []),
+                    ],
+                },
+            ],
+            main,
+        });
+    }
+}
+
+// Páginas individuais
+function relatedOf(a) {
+    const others = ARTICLES.filter((o) => o !== a);
+    const score = (o) => (o.category?.slug === a.category?.slug ? 2 : 0) + (o.areaList.some((s) => a.areaList.includes(s)) ? 1 : 0);
+    return others.map((o) => [o, score(o)]).filter(([, s]) => s > 0).sort((x, y) => y[1] - x[1]).map(([o]) => o).concat(others).filter((o, i, arr) => arr.indexOf(o) === i).slice(0, 3);
+}
+
+function shareBlock(a) {
+    const url = abs(a.url);
+    const u = encodeURIComponent(url);
+    const t = encodeURIComponent(a.titulo);
+    const links = [
+        ["whatsapp", "WhatsApp", `https://wa.me/?text=${encodeURIComponent(`${a.titulo} — ${url}`)}`],
+        ["linkedin", "LinkedIn", `https://www.linkedin.com/sharing/share-offsite/?url=${u}`],
+        ["facebook", "Facebook", `https://www.facebook.com/sharer/sharer.php?u=${u}`],
+        ["x", "X (Twitter)", `https://twitter.com/intent/tweet?url=${u}&text=${t}`],
+        ["email", "E-mail", `mailto:?subject=${t}&body=${encodeURIComponent(`${a.titulo}\n${url}`)}`],
+    ];
+    return `<div class="article-share" aria-labelledby="compartilhar-titulo">
+            <p class="article-share__title" id="compartilhar-titulo">${icon("share", { size: 18 })} Compartilhe este artigo</p>
+            <ul>
+                ${links.map(([id, label, href]) => `<li><a class="share-btn" href="${esc(href)}"${id === "email" ? "" : ' target="_blank" rel="noopener noreferrer"'} data-share="${id}">${label}<span class="visually-hidden"> (abre em nova janela)</span></a></li>`).join("")}
+                <li><button type="button" class="share-btn" data-share="copiar" data-url="${esc(url)}" hidden>${icon("link", { size: 16 })}<span>Copiar link</span></button></li>
+            </ul>
+        </div>`;
+}
+
+// Informações institucionais e canais de contato (o CTA principal fica no rodapé).
+function officeContact(a, message) {
+    return `<ul class="article-contact__list">
+                    <li>${icon("phone", { size: 18 })}<span>Telefone: <a href="${SITE.phoneHref}" class="js-phone">${SITE.phoneDisplay}</a> · <a class="js-wa" href="${esc(wa(message))}" target="_blank" rel="noopener" data-track="artigo-${a.slug}">WhatsApp</a></span></li>
+                    <li>${icon("clock", { size: 18 })}<span>${SITE.hours}</span></li>
+                    <li>${icon("pin", { size: 18 })}<span>${SITE.addressLine}</span></li>
+                </ul>
+                <p class="author-box__note">${SITE.noContract}</p>`;
+}
+
+function authorBox(a, message) {
+    if (!isLawyer(a.autor)) {
+        return `<aside class="author-box" aria-label="Autor"><div><p class="author-box__label">Autor</p><p class="author-box__name">${esc(a.autor)}</p></div></aside>
+        <aside class="author-box" aria-label="Escritório"><div><p class="author-box__label">Escritório</p><p class="author-box__name">${SITE.name}</p>${officeContact(a, message)}</div></aside>`;
+    }
+    return `<aside class="author-box" aria-label="Advogado responsável">
+            ${picture("dr-alexandre-retrato", { alt: `Retrato do ${SITE.lawyer}`, sizes: "96px", cls: "author-box__photo" })}
+            <div>
+                <p class="author-box__label">Advogado responsável</p>
+                <p class="author-box__name"><a href="sobre.html" rel="author">${SITE.lawyer}</a></p>
+                <p class="author-box__meta">${SITE.oab} · ${SITE.title.charAt(0).toUpperCase()}${SITE.title.slice(1)} · ${SITE.name}</p>
+                ${officeContact(a, message)}
+            </div>
+        </aside>`;
+}
+
+function tocBlock(a) {
+    const h2s = a.headings.filter((h) => h.level === 2);
+    if (h2s.length < 3) return "";
+    const items = [];
+    for (const h of a.headings) {
+        if (h.level === 2) items.push({ ...h, children: [] });
+        else if (items.length) items.at(-1).children.push(h);
+    }
+    if (a.referencias.length) items.push({ id: "referencias", text: "Referências", children: [] });
+    const li = (h) => `<li><a href="#${h.id}">${esc(h.text)}</a>${h.children?.length ? `<ol>${h.children.map(li).join("")}</ol>` : ""}</li>`;
+    return `<nav class="article-toc" aria-labelledby="sumario-titulo" data-toc>
+            <details open>
+                <summary><span id="sumario-titulo">${icon("list", { size: 18 })} Neste artigo</span></summary>
+                <ol>${items.map(li).join("")}</ol>
+            </details>
+        </nav>`;
+}
+
+for (const a of ARTICLES) {
+    const url = abs(a.url);
+    const cat = a.category;
+    const area = areaBySlug[cat?.area] || areaBySlug[a.areaList[0]];
+    const published = a.published ? `<time datetime="${a.published.toISOString()}">${formatDate(a.published)}</time>` : "sem data";
+    const ogImg = a.social || a.cover;
+    const related = relatedOf(a);
+    const toc = tocBlock(a);
+    const refs = a.referencias.length
+        ? `<section class="article-refs" aria-labelledby="referencias"><h2 id="referencias">Referências</h2><ol>${a.referencias.map((r) => `<li>${r.link ? `<a href="${esc(r.link)}"${/^https?:/.test(r.link) ? ' target="_blank" rel="noopener noreferrer"' : ""}>${esc(r.texto)}</a>` : esc(r.texto)}</li>`).join("")}</ol></section>`
+        : "";
+    const areasHtml = a.areaList.length
+        ? `<section class="article-areas" aria-labelledby="areas-relacionadas"><h2 id="areas-relacionadas" class="article-areas__title">Área de atuação relacionada</h2>
+            <ul class="other-areas other-areas--compact">${a.areaList.map((s) => areaBySlug[s]).map((o) => `<li><a class="other-area" href="${o.slug}.html" data-area-link="${o.slug}"><span class="other-area__icon">${icon(o.icon, { size: 24 })}</span><span class="other-area__name">${o.crumb || o.name}</span>${icon("arrowUpRight", { size: 18, cls: "icon other-area__arrow" })}</a></li>`).join("")}</ul></section>`
+        : "";
+    const main = `
+        <article class="article" data-article data-slug="${a.slug}" data-category="${cat?.slug || ""}">
+            <header class="page-hero article-hero">
+                <div class="topo topo--dark" aria-hidden="true"></div>
+                <div class="container page-hero__inner article-hero__inner">
+                    <nav class="breadcrumbs" aria-label="Você está em"><ol><li><a href="index.html">Início</a></li><li><a href="artigos/">Artigos</a></li><li aria-current="page">${esc(a.titulo)}</li></ol></nav>
+                    ${a.preview ? `<p class="article-draft-banner">Prévia — este conteúdo ainda não está publicado (${a.status === "rascunho" ? "rascunho" : "agendado"}).</p>` : ""}
+                    ${cat ? `<p class="kicker"><a href="artigos/?categoria=${cat.slug}">${esc(cat.nome)}</a></p>` : ""}
+                    <h1>${esc(a.titulo)}</h1>
+                    ${a.resumo ? `<p class="page-hero__text">${esc(a.resumo)}</p>` : ""}
+                    <ul class="article-meta">
+                        <li>${icon("user", { size: 18 })}<span>Por ${isLawyer(a.autor) ? `<a href="sobre.html" rel="author">${SITE.lawyer}</a> · ${SITE.oab}` : esc(a.autor)}</span></li>
+                        <li>${icon("calendar", { size: 18 })}<span>Publicado em ${published}</span></li>
+                        ${a.updated ? `<li>${icon("calendar", { size: 18 })}<span>Atualizado em <time datetime="${a.updated.toISOString()}">${formatDate(a.updated)}</time></span></li>` : ""}
+                        <li>${icon("clock", { size: 18 })}<span>${a.minutes} min de leitura</span></li>
+                    </ul>
+                </div>
+            </header>
+            ${a.cover ? `<figure class="article-cover container">${pictureHtml(a.cover, { alt: a.capaAlt || "", sizes: "(min-width: 1240px) 1160px, 94vw", eager: true })}</figure>` : ""}
+            <div class="section section--light article-wrap${a.cover ? " article-wrap--cover" : ""}">
+                <div class="container article-layout${toc ? "" : " article-layout--single"}">
+                    ${toc ? `<aside class="article-aside">${toc}</aside>` : ""}
+                    <div class="article-main">
+                        <div class="article-body" data-article-body>
+${a.html}
+                        </div>
+                        ${refs}
+                        <p class="legal-note article-disclaimer">${SITE.disclaimer}</p>
+                        <span data-article-end aria-hidden="true"></span>
+                        ${shareBlock(a)}
+                        ${authorBox(a, area?.message || SITE.defaultMessage)}
+                        ${areasHtml}
+                    </div>
+                </div>
+            </div>
+        </article>
+        ${related.length ? `<section class="section section--cream related" aria-labelledby="relacionados">
+            <div class="container">
+                <div class="section-head"><p class="kicker">Continue lendo</p><h2 id="relacionados">Artigos relacionados</h2></div>
+                <div class="articles-grid">${related.map((r) => articleCard(r)).join("\n")}</div>
+                <p class="related__all"><a class="text-link" href="artigos/">Ver todos os artigos ${icon("arrow", { size: 18 })}</a></p>
+            </div>
+        </section>` : ""}`;
+
+    const metaTitle = a.seoTitle || a.titulo;
+    const description = a.seoDescription || a.resumo || ARTICLES_DESC;
+    const image = ogImg ? { url: abs(ogImg.large ? ogImg.large.replace(/^\//, "") : ogImg.src.replace(/^\//, "")), width: ogImg.largeWidth, height: ogImg.largeHeight, alt: a.capaAlt || a.titulo } : null;
+    pages.push({
+        file: `artigos/${a.slug}/index.html`,
+        urlPath: a.url,
+        nested: true,
+        fast: true,
+        articlesCss: true,
+        bodyClass: "artigo",
+        navKey: "artigos",
+        fullTitle: `${metaTitle} | ${SITE.name}`,
+        description,
+        ogTitle: metaTitle,
+        ogDescription: description,
+        ogType: "article",
+        ogImage: image || undefined,
+        author: a.autor || SITE.lawyer,
+        message: area?.message || SITE.defaultMessage,
+        noindex: a.preview || !a.indexable,
+        sitemap: !a.preview && a.indexable,
+        lastmod: lastmodOf(a),
+        extraHead: [
+            a.published ? `<meta property="article:published_time" content="${a.published.toISOString()}">` : "",
+            `<meta property="article:modified_time" content="${(a.updated || a.published || NOW).toISOString()}">`,
+            cat ? `<meta property="article:section" content="${esc(cat.nome)}">` : "",
+        ].filter(Boolean).map((l) => `${l}\n    `).join(""),
+        jsonld: [
+            {
+                "@context": "https://schema.org",
+                "@type": "BlogPosting",
+                "@id": `${url}#artigo`,
+                mainEntityOfPage: { "@type": "WebPage", "@id": url },
+                headline: a.titulo.slice(0, 110),
+                description,
+                image: image ? [image.url] : [abs("assets/img/og-alexandre-campos-puchetti.jpg")],
+                datePublished: a.published?.toISOString(),
+                dateModified: (a.updated || a.published)?.toISOString(),
+                author: personSchema(a.autor),
+                publisher: publisherSchema,
+                articleSection: cat?.nome,
+                inLanguage: "pt-BR",
+                wordCount: a.words,
+                isAccessibleForFree: true,
+            },
+            {
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                    { "@type": "ListItem", position: 1, name: "Início", item: `${SITE.url}/` },
+                    { "@type": "ListItem", position: 2, name: "Artigos jurídicos", item: abs("artigos/") },
+                    { "@type": "ListItem", position: 3, name: a.titulo, item: url },
+                ],
+            },
+        ],
+        main,
+    });
+
+    // Endereços antigos: página de redirecionamento imediato (tratada pelo Google como permanente).
+    for (const old of a.oldSlugs) {
+        if (ARTICLES.some((o) => o.slug === old)) continue;
+        pages.push({ file: `artigos/${old}/index.html`, raw: redirectPage(url), sitemap: false });
+    }
+}
+
+function redirectPage(to) {
+    return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Endereço alterado | ${SITE.name}</title>
+    <meta name="robots" content="noindex, follow">
+    <link rel="canonical" href="${to}">
+    <meta http-equiv="refresh" content="0; url=${to}">
+</head>
+<body><p>Este artigo mudou de endereço: <a href="${to}">${to}</a></p></body>
+</html>
+`;
+}
+
 // ---------- fundos topográficos ----------
 function topoSvg(stroke, opacity) {
     // Curvas de nível geradas deterministicamente (soma de senoides por anel).
@@ -847,9 +1262,42 @@ async function safeWrite(file, content) {
     }
 }
 
-for (const p of pages) {
-    await safeWrite(path.join(root, p.file), postProcess(layout(p)));
+// Páginas em subpastas (/artigos/...) usam caminhos a partir da raiz do site.
+function absolutize(html) {
+    const fix = (u) => (/^(?:[a-z][a-z0-9+.-]*:|\/|#|\?)/i.test(u) || u === "" ? u : `/${u}`);
+    return html.replace(/\s(href|src|srcset|data-src)="([^"]*)"/g, (_, attr, val) => {
+        const out = attr === "srcset" ? val.split(",").map((part) => part.trim().replace(/^(\S+)/, (u) => fix(u))).join(", ") : fix(val);
+        return ` ${attr}="${out}"`;
+    });
 }
+
+// Recria a pasta /artigos a cada build: artigos despublicados ou excluídos deixam de existir.
+await rm(path.join(root, "artigos"), { recursive: true, force: true });
+for (const p of pages) {
+    const file = path.join(root, p.file);
+    await mkdir(path.dirname(file), { recursive: true });
+    const html = p.raw || postProcess(layout(p));
+    await safeWrite(file, p.nested ? absolutize(html) : html);
+}
+
+// Índice para a busca/filtro da página de artigos e agenda de publicações futuras.
+const searchIndex = ARTICLES.map((a) => ({
+    t: a.titulo,
+    d: a.resumo,
+    c: a.category?.slug || "",
+    cn: a.category?.nome || "",
+    u: `/${a.url}`,
+    dt: a.published?.toISOString() || "",
+    dl: a.published ? formatDate(a.published) : "",
+    a: a.autor || SITE.lawyer,
+    r: a.minutes,
+    i: a.cover ? { s: a.cover.thumb || a.cover.fallback, w: a.cover.width, h: a.cover.height, alt: a.capaAlt || "" } : null,
+    ic: categoryIcon(a.category),
+}));
+await safeWrite(path.join(root, "artigos/indice.json"), JSON.stringify(searchIndex));
+await safeWrite(path.join(root, "artigos/agenda.json"), JSON.stringify(WITH_DRAFTS ? [] : content.scheduled.map((a) => a.published.toISOString())));
+// Ícones das categorias para os cards gerados pela busca (mesmo SVG do build).
+await safeWrite(path.join(root, "artigos/icones.json"), JSON.stringify(Object.fromEntries([...new Set(searchIndex.map((s) => s.ic))].map((n) => [n, icon(n, { size: 40, stroke: 1.25 })]))));
 
 // Versiona os imports dos módulos JS (evita cache antigo após cada publicação).
 // Todos os módulos usam a mesma versão para não haver instâncias duplicadas.
@@ -861,13 +1309,39 @@ for (const file of jsFiles) {
     if (out !== src) await safeWrite(file, out);
 }
 
-const priority = (f) => (f === "index.html" ? "1.0" : AREAS.some((a) => `${a.slug}.html` === f) ? "0.8" : LEGAL_PAGES.some((l) => `${l.slug}.html` === f) ? "0.3" : "0.7");
-const freq = (f) => (f === "index.html" ? "weekly" : LEGAL_PAGES.some((l) => `${l.slug}.html` === f) ? "yearly" : "monthly");
+// Sitemap: somente URLs públicas, canônicas e indexáveis. O lastmod das páginas fixas vem de
+// PAGES_LASTMOD (site-data.mjs) e o dos artigos, da data de atualização/publicação.
+const isArticle = (f) => f.startsWith("artigos/");
+const priority = (f) => (f === "index.html" ? "1.0" : AREAS.some((a) => `${a.slug}.html` === f) ? "0.8" : LEGAL_PAGES.some((l) => `${l.slug}.html` === f) ? "0.3" : f === "artigos/index.html" ? "0.7" : isArticle(f) ? "0.6" : "0.7");
+const freq = (f) => (f === "index.html" || f === "artigos/index.html" ? "weekly" : LEGAL_PAGES.some((l) => `${l.slug}.html` === f) ? "yearly" : "monthly");
+const sitemapPages = pages.filter((p) => !p.raw && !p.noindex && p.sitemap !== false && !WITH_DRAFTS);
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${pages.map((p) => `  <url><loc>${abs(p.file === "index.html" ? "" : p.file)}</loc><lastmod>${TODAY}</lastmod><changefreq>${freq(p.file)}</changefreq><priority>${priority(p.file)}</priority></url>`).join("\n")}
+${sitemapPages.map((p) => `  <url><loc>${canonicalOf(p)}</loc><lastmod>${p.lastmod || PAGES_LASTMOD}</lastmod><changefreq>${freq(p.file)}</changefreq><priority>${priority(p.file)}</priority></url>`).join("\n")}
 </urlset>
 `;
-await writeFile(path.join(root, "sitemap.xml"), sitemap, "utf8");
-await writeFile(path.join(root, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${abs("sitemap.xml")}\n`, "utf8");
-console.log(`${pages.length} páginas geradas + sitemap.xml + robots.txt`);
+if (!WITH_DRAFTS) {
+    await safeWrite(path.join(root, "sitemap.xml"), sitemap);
+    await safeWrite(path.join(root, "robots.txt"), `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\n\nSitemap: ${abs("sitemap.xml")}\n`);
+}
+
+const fmt = (list) => list.map((a) => `   - ${a.slug} (${a.file})`).join("\n");
+console.log(`${pages.length} páginas geradas${WITH_DRAFTS ? " (PRÉVIA COM RASCUNHOS — não publique esta versão)" : " + sitemap.xml + robots.txt"}`);
+console.log(`Artigos: ${content.published.length} publicado(s), ${content.scheduled.length} agendado(s), ${content.drafts.length} rascunho(s).`);
+if (content.scheduled.length) console.log(` Agendados:\n${fmt(content.scheduled)}`);
+for (const w of [...content.warnings, ...imageWarnings]) console.warn(` ! ${w}`);
+
+// ---------- pacote de publicação (/dist) ----------
+if (ARGS.has("--dist")) {
+    if (WITH_DRAFTS) throw new Error("--dist não pode ser usado com --drafts.");
+    const dist = path.join(root, "dist");
+    await rm(dist, { recursive: true, force: true });
+    await mkdir(dist, { recursive: true });
+    const rootFiles = (await readDir(root)).filter((f) => /\.(html|txt|xml|webmanifest|ico|png)$/.test(f) && !f.startsWith("preview-"));
+    for (const f of rootFiles) await cp(path.join(root, f), path.join(dist, f));
+    // Pastas públicas. /content (rascunhos), /tools e /api nunca são copiados.
+    for (const dir of ["assets", "artigos", "admin", "imagem"]) {
+        await cp(path.join(root, dir), path.join(dist, dir), { recursive: true });
+    }
+    console.log(`Pacote de publicação gerado em /dist (${rootFiles.length} arquivos na raiz + assets, artigos, admin, imagem).`);
+}
