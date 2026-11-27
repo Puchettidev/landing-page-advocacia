@@ -1,0 +1,13 @@
+{
+  "categorias": [
+    { "nome": "Direito Bancário", "slug": "direito-bancario", "descricao": "Contratos bancários, cobranças, execuções e defesa do devedor.", "area": "direito-bancario" },
+    { "nome": "Direito do Produtor Rural", "slug": "direito-do-produtor-rural", "descricao": "Atividade rural, patrimônio do produtor e relações com instituições financeiras.", "area": "defesa-do-produtor-rural" },
+    { "nome": "Crédito Rural", "slug": "credito-rural", "descricao": "Financiamentos, cédulas, renegociação e alongamento de dívidas rurais.", "area": "defesa-do-produtor-rural" },
+    { "nome": "Direito da Saúde", "slug": "direito-da-saude", "descricao": "Planos de saúde, SUS, tratamentos, medicamentos e procedimentos.", "area": "direito-da-saude" },
+    { "nome": "Direito Previdenciário", "slug": "direito-previdenciario", "descricao": "Benefícios do INSS, requisitos legais e revisões.", "area": "direito-previdenciario" },
+    { "nome": "Direito Civil", "slug": "direito-civil", "descricao": "Contratos, obrigações, responsabilidade civil e patrimônio.", "area": "" },
+    { "nome": "Direito de Família", "slug": "direito-de-familia", "descricao": "Divórcio, guarda, alimentos, união estável e partilha.", "area": "direito-de-familia" },
+    { "nome": "Direito das Sucessões", "slug": "direito-das-sucessoes", "descricao": "Inventário, partilha, testamentos e planejamento sucessório.", "area": "inventario-e-sucessoes" },
+    { "nome": "Direito do Consumidor", "slug": "direito-do-consumidor", "descricao": "Relações de consumo, contratos e direitos do consumidor.", "area": "" }
+  ]
+}

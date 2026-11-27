@@ -1,5 +1,5 @@
 // FAQ: acordeão com altura animada, busca e filtros por tema.
-import { env, $, $$, track } from "./env.js?v=115b962aea";
+import { env, $, $$, track } from "./env.js?v=371857c65f";
 
 export function initFaq() {
     $$("[data-faq]").forEach((faq) => {
@@ -85,7 +85,7 @@ function initFilters(faq, items) {
         clearTimeout(timer);
         timer = setTimeout(() => {
             apply();
-            if (input.value.trim().length > 2) track("faq_search", { term: input.value.trim() });
+            if (input.value.trim().length > 2) track("faq_search"); // o termo digitado não é enviado (pode conter dados pessoais)
         }, 120);
     });
 

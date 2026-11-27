@@ -32,6 +32,10 @@ export const SITE = {
     sensitiveWarning: "Evite enviar dados médicos, bancários ou documentos sigilosos neste primeiro contato.",
 };
 
+// Data da última alteração relevante das páginas fixas (usada no <lastmod> do sitemap).
+// Atualize somente quando o conteúdo dessas páginas mudar de fato.
+export const PAGES_LASTMOD = "2026-11-24";
+
 export const DIFFERENTIALS = ["Atendimento personalizado", "Análise individual do caso", "Comunicação clara"];
 
 export const VALUES = [
@@ -137,8 +141,9 @@ export const AREAS = [
         documents: ["Contratos", "Cédulas", "Comprovantes de produção", "Notificações bancárias", "Laudos", "Documentos processuais, quando existentes"],
         faqCats: ["rural", "bancario"],
         message: "Olá! Sou produtor rural e gostaria de orientação sobre a minha situação.",
+        seoTitle: "Advogado para Produtor Rural em Muriaé/MG | Crédito Rural",
         metaTitle: "Defesa do Produtor Rural em Muriaé/MG",
-        metaDescription: "Atuação jurídica voltada à defesa do produtor rural: contratos de crédito rural, execuções bancárias, CPR, alongamento de dívidas rurais e MCR.",
+        metaDescription: "Advogado em Muriaé/MG com atuação na defesa do produtor rural: crédito rural, execuções bancárias, CPR, alongamento e renegociação de dívidas rurais.",
         ogDescription: "Preservação da atividade produtiva, do patrimônio e do acesso ao crédito rural.",
     },
     {
@@ -167,6 +172,7 @@ export const AREAS = [
         documents: ["Contratos", "Boletos", "Notificações", "Demonstrativos da dívida", "Documentos processuais, quando houver"],
         faqCats: ["bancario"],
         message: "Olá! Gostaria de orientação sobre uma situação envolvendo contrato ou cobrança bancária.",
+        seoTitle: "Advogado de Direito Bancário em Muriaé/MG | Defesa do Devedor",
         metaTitle: "Direito Bancário e Defesa do Devedor em Muriaé/MG",
         metaDescription: "Atuação em Direito Bancário: defesa em execuções, cobranças, busca e apreensão, revisão contratual e negociação judicial de dívidas em Muriaé/MG.",
         ogDescription: "Análise da legalidade da cobrança e dos instrumentos contratuais em demandas bancárias.",
@@ -195,8 +201,9 @@ export const AREAS = [
         documents: ["Relatórios médicos", "Prescrições", "Negativas formais", "Exames", "Documentos do plano de saúde ou do SUS"],
         faqCats: ["saude"],
         message: "Olá! Gostaria de orientação sobre uma questão de Direito da Saúde.",
+        seoTitle: "Advogado de Direito da Saúde em Muriaé/MG | Planos e SUS",
         metaTitle: "Direito da Saúde em Muriaé/MG",
-        metaDescription: "Atuação em demandas de saúde envolvendo tratamentos, medicamentos, procedimentos, internações e coberturas negadas pelo SUS ou planos de saúde.",
+        metaDescription: "Advogado em Muriaé/MG para demandas de saúde: negativas de plano de saúde e do SUS, home care, cirurgias, medicamentos de alto custo e internações.",
         ogDescription: "Análise jurídica de demandas de saúde conforme documentação médica e circunstâncias do caso.",
     },
     {
@@ -222,8 +229,9 @@ export const AREAS = [
         documents: ["CNIS", "Documentos pessoais", "Laudos", "Comprovantes de contribuições", "Demais registros pertinentes"],
         faqCats: ["previdenciario"],
         message: "Olá! Gostaria de orientação sobre um benefício do INSS.",
+        seoTitle: "Advogado Previdenciário em Muriaé/MG | Benefícios do INSS",
         metaTitle: "Direito Previdenciário em Muriaé/MG",
-        metaDescription: "Atuação administrativa e judicial em demandas perante o INSS: aposentadorias, benefícios por incapacidade, BPC/LOAS e revisões.",
+        metaDescription: "Advogado previdenciário em Muriaé/MG: aposentadorias, auxílio por incapacidade, auxílio-acidente, BPC/LOAS e revisão de benefícios do INSS.",
         ogDescription: "Análise da documentação, do histórico contributivo e dos requisitos legais em demandas perante o INSS.",
     },
     {
@@ -250,8 +258,9 @@ export const AREAS = [
         faqCats: ["familia"],
         faqFilter: (item) => item.q.startsWith("Casos de família"),
         message: "Olá! Gostaria de orientação sobre uma questão de Direito de Família.",
+        seoTitle: "Advogado de Família em Muriaé/MG | Divórcio, Guarda e Pensão",
         metaTitle: "Direito de Família em Muriaé/MG",
-        metaDescription: "Atuação em Direito de Família: divórcio, guarda, pensão alimentícia, convivência, paternidade, união estável e partilha de bens.",
+        metaDescription: "Advogado de família em Muriaé/MG: divórcio, guarda de filhos, pensão alimentícia, convivência, união estável, paternidade e partilha de bens.",
         ogDescription: "Orientação jurídica em conflitos familiares, com sensibilidade e atenção aos direitos das partes e dos filhos.",
     },
     {
@@ -279,8 +288,9 @@ export const AREAS = [
         faqCats: ["familia"],
         faqFilter: (item) => !item.q.startsWith("Casos de família"),
         message: "Olá! Gostaria de orientação sobre inventário ou sucessão.",
+        seoTitle: "Advogado de Inventário em Muriaé/MG | Inventário e Sucessões",
         metaTitle: "Inventário e Sucessões em Muriaé/MG",
-        metaDescription: "Assessoria em inventários judiciais e extrajudiciais, partilha de bens, arrolamento, testamentos e planejamento sucessório em Muriaé/MG.",
+        metaDescription: "Advogado em Muriaé/MG para inventário judicial e extrajudicial, partilha de bens, arrolamento, testamentos e planejamento sucessório.",
         ogDescription: "Análise da documentação, dos herdeiros e dos bens envolvidos na transmissão patrimonial.",
     },
     {
@@ -306,8 +316,9 @@ export const AREAS = [
         documents: ["Documentos do ato praticado pela autoridade", "Elementos que permitam verificar o prazo", "Documentos que demonstrem o direito alegado"],
         faqCats: ["mandado"],
         message: "Olá! Gostaria de orientação sobre mandado de segurança ou questão administrativa.",
+        seoTitle: "Advogado para Mandado de Segurança em Muriaé/MG",
         metaTitle: "Mandado de Segurança e Direito Administrativo em Muriaé/MG",
-        metaDescription: "Atuação em mandado de segurança, direito à saúde, educação, concursos públicos, servidores e atos administrativos ilegais.",
+        metaDescription: "Advogado em Muriaé/MG para mandado de segurança com pedido liminar: saúde, educação, concursos públicos, servidores e atos administrativos ilegais.",
         ogDescription: "Proteção de direito líquido e certo diante de atos ilegais ou abusivos de autoridades públicas.",
     },
 ];
@@ -323,7 +334,7 @@ export const LEGAL_PAGES = [
             ["Finalidade", "Os dados são utilizados para responder contatos, organizar a análise inicial, prestar informações sobre atendimento e cumprir obrigações legais ou regulatórias aplicáveis."],
             ["Dados sensíveis e documentos", "Evite enviar dados médicos, bancários ou documentos sigilosos neste primeiro contato. Caso a análise demande documentos, o envio deve ocorrer por canal adequado e seguro."],
             ["WhatsApp e terceiros", "Ao clicar em links de WhatsApp, o usuário passa a utilizar ambiente externo sujeito às políticas da respectiva plataforma."],
-            ["Cookies e analytics", "O site pode registrar eventos técnicos de navegação e cliques para melhoria de experiência e mensuração, desde que haja configuração apropriada. IDs de ferramentas de analytics devem ser inseridos somente quando confirmados."],
+            ["Cookies e analytics", "Quando ativada, a medição de audiência (Google Analytics 4) somente é carregada após o consentimento do visitante, que pode aceitar ou recusar no aviso exibido no site e alterar a escolha a qualquer momento em “Preferências de cookies”, no rodapé. A medição registra, de forma agregada, páginas visitadas e cliques nos canais de contato, sem envio de nome, telefone, e-mail, termos digitados ou relatos de casos."],
             ["Direitos do titular", "O titular pode solicitar informações, correção, exclusão ou esclarecimentos sobre seus dados pelos canais de contato do escritório."],
             ["Contato", "Telefone e WhatsApp: (32) 98848-0180. Endereço: Rua Coronel Marciano Rodrigues, nº 151, Loja 10 B, Centro, Muriaé/MG, CEP 36880-027."],
         ],
@@ -331,7 +342,7 @@ export const LEGAL_PAGES = [
     {
         slug: "termos-de-uso",
         title: "Termos de Uso",
-        metaDescription: "Termos de uso do site Alexandre Campos Puchetti Advocacia.",
+        metaDescription: "Termos de uso do site Alexandre Campos Puchetti Advocacia: finalidade informativa do conteúdo, contato sem contratação automática e links externos.",
         intro: "Ao acessar este site, o usuário declara ciência de que as informações possuem finalidade institucional e informativa.",
         sections: [
             ["Uso do conteúdo", "O conteúdo não substitui consulta jurídica individualizada e não deve ser interpretado como orientação específica para caso concreto."],

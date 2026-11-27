@@ -1,2 +1,6 @@
 tools/node_modules/
 .env
+# gerados pelo build (tools/build.mjs)
+/dist/
+/artigos/
+/assets/uploads/_otim/

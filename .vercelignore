@@ -1,1 +1,5 @@
-tools/
+tools/node_modules/
+dist/
+.claude/
+.agents/
+preview-*.png

@@ -9,7 +9,7 @@ const port = Number(process.argv[2] || process.env.PORT || 5173);
 const types = {
     ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8",
     ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
-    ".webp": "image/webp", ".avif": "image/avif", ".xml": "application/xml", ".txt": "text/plain; charset=utf-8",
+    ".webp": "image/webp", ".avif": "image/avif", ".xml": "application/xml", ".txt": "text/plain; charset=utf-8", ".yml": "text/yaml; charset=utf-8",
 };
 
 createServer(async (req, res) => {
@@ -18,7 +18,13 @@ createServer(async (req, res) => {
         if (p.endsWith("/")) p += "index.html";
         const file = path.join(root, p);
         if (!file.startsWith(root)) throw new Error("fora da raiz");
-        await stat(file);
+        // Arquivos internos não são servidos (como no site publicado).
+        if (/^[\\/](content|tools|api|dist)[\\/]/.test(p)) throw new Error("privado");
+        const s = await stat(file);
+        if (s.isDirectory()) {
+            res.writeHead(308, { Location: `${p}/` });
+            return res.end();
+        }
         res.writeHead(200, { "Content-Type": types[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-store" });
         res.end(await readFile(file));
     } catch {

@@ -1,0 +1,169 @@
+# Painel de artigos — Decap CMS (https://decapcms.org)
+# Cada alteração salva aqui vira um commit no GitHub; a Vercel publica o site em seguida.
+backend:
+  name: github
+  repo: Puchettidev/landing-page-advocacia
+  branch: main
+  base_url: https://www.alexandrecampospuchetti.com.br
+  auth_endpoint: api/auth
+  commit_messages:
+    create: 'Artigos: cria "{{slug}}"'
+    update: 'Artigos: atualiza "{{slug}}"'
+    delete: 'Artigos: exclui "{{slug}}"'
+    uploadMedia: 'Mídia: envia "{{path}}"'
+    deleteMedia: 'Mídia: remove "{{path}}"'
+
+# Ao abrir o painel em http://localhost, usa o servidor local (npx decap-server) em vez do GitHub.
+local_backend: true
+
+locale: pt
+site_url: https://www.alexandrecampospuchetti.com.br
+display_url: https://www.alexandrecampospuchetti.com.br
+logo_url: /assets/img/monograma-trigo.png
+
+media_folder: assets/uploads
+public_folder: /assets/uploads
+
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: "-"
+
+collections:
+  - name: artigos
+    label: Artigos
+    label_singular: Artigo
+    description: >-
+      Artigos jurídicos de caráter informativo. Para publicar, altere o "Status" para "Publicado".
+      Datas futuras ficam agendadas e são publicadas automaticamente no dia (verificação diária).
+    folder: content/artigos
+    extension: json
+    format: json
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    identifier_field: titulo
+    summary: "{{titulo}} · {{status}} · {{publicado_em | date('DD/MM/YYYY')}}"
+    sortable_fields: [publicado_em, titulo, status]
+    view_filters:
+      - { label: Rascunhos, field: status, pattern: rascunho }
+      - { label: Publicados ou agendados, field: status, pattern: publicado }
+    view_groups:
+      - { label: Status, field: status }
+      - { label: Categoria, field: categoria }
+    preview_path: "artigos/{{fields.slug}}/"
+    fields:
+      - { name: titulo, label: Título (H1), widget: string, hint: "Título principal do artigo. Ideal: até 70 caracteres." }
+      - name: slug
+        label: Endereço (URL amigável)
+        widget: string
+        hint: >-
+          Parte final do endereço: /artigos/ESTE-TEXTO/. Use letras minúsculas, números e hífens.
+          Evite alterar depois de publicado; se alterar, registre o endereço anterior em "Endereços antigos".
+        pattern: ['^[a-z0-9]+(-[a-z0-9]+)*$', "Use apenas letras minúsculas sem acento, números e hífens (ex.: alongamento-de-dividas-rurais)."]
+      - name: status
+        label: Status
+        widget: select
+        default: rascunho
+        options:
+          - { label: "Rascunho (não aparece no site)", value: rascunho }
+          - { label: "Publicado (ou agendado, se a data for futura)", value: publicado }
+      - name: categoria
+        label: Categoria jurídica
+        widget: relation
+        collection: configuracoes
+        file: categorias
+        search_fields: ["categorias.*.nome"]
+        display_fields: ["categorias.*.nome"]
+        value_field: "categorias.*.slug"
+      - { name: resumo, label: Breve descrição, widget: text, hint: "Aparece nos cards e, se o campo de SEO ficar vazio, como descrição no Google. Ideal: 120 a 160 caracteres." }
+      - { name: autor, label: Autor, widget: string, default: "Dr. Alexandre Campos Puchetti" }
+      - { name: publicado_em, label: Data de publicação, widget: datetime, hint: "Data futura = publicação agendada." }
+      - { name: atualizado_em, label: Data da última atualização, widget: datetime, required: false, hint: "Preencha somente quando houver alteração relevante no conteúdo (usada no Google e no sitemap)." }
+      - { name: capa, label: Imagem de capa, widget: image, required: false, choose_url: false, hint: "JPG, PNG ou WebP, de preferência com 1600 px de largura. Versões otimizadas (AVIF/WebP) são geradas automaticamente." }
+      - { name: capa_alt, label: Descrição da imagem de capa (texto alternativo), widget: string, required: false, hint: "Descreva a imagem para leitores de tela e para o Google." }
+      - { name: destaque, label: Destacar na página de artigos, widget: boolean, default: false, required: false }
+      - name: corpo
+        label: Conteúdo
+        widget: markdown
+        hint: "Use Título 2 para as seções e Título 3 para subseções. O sumário é montado automaticamente."
+        buttons: [bold, italic, link, heading-two, heading-three, heading-four, quote, bulleted-list, numbered-list]
+        editor_components: [image, tabela]
+        modes: [rich_text, raw]
+      - name: referencias
+        label: Referências legislativas e jurisprudenciais
+        label_singular: Referência
+        widget: list
+        required: false
+        hint: "Inclua somente referências conferidas pelo advogado responsável."
+        fields:
+          - { name: texto, label: Referência, widget: string }
+          - { name: link, label: Link (opcional), widget: string, required: false }
+      - name: areas_relacionadas
+        label: Áreas de atuação relacionadas
+        widget: select
+        multiple: true
+        required: false
+        hint: "Links para as páginas de atuação exibidos ao final do artigo (a área da categoria já é incluída)."
+        options:
+          - { label: Defesa do Produtor Rural, value: defesa-do-produtor-rural }
+          - { label: Direito Bancário, value: direito-bancario }
+          - { label: Direito da Saúde, value: direito-da-saude }
+          - { label: Direito Previdenciário, value: direito-previdenciario }
+          - { label: Direito de Família, value: direito-de-familia }
+          - { label: Inventário e Sucessões, value: inventario-e-sucessoes }
+          - { label: Mandado de Segurança, value: mandado-de-seguranca }
+      - name: seo
+        label: SEO (Google e redes sociais)
+        widget: object
+        collapsed: true
+        required: false
+        fields:
+          - { name: titulo, label: Meta title, widget: string, required: false, hint: "Se vazio, usa o título do artigo. Ideal: até 60 caracteres." }
+          - { name: descricao, label: Meta description, widget: text, required: false, hint: "Se vazio, usa a breve descrição. Ideal: 120 a 160 caracteres." }
+          - { name: imagem_social, label: Imagem para redes sociais, widget: image, required: false, choose_url: false, hint: "Se vazio, usa a imagem de capa. Ideal: 1200 × 630 px." }
+          - { name: indexar, label: Permitir indexação no Google, widget: boolean, default: true, required: false }
+      - name: enderecos_antigos
+        label: Endereços antigos (redirecionamento)
+        label_singular: Endereço antigo
+        widget: list
+        required: false
+        field: { name: endereco, label: Endereço antigo, widget: string }
+        hint: "Se o endereço do artigo mudou, informe aqui o texto antigo: o endereço antigo passará a levar ao novo."
+
+  - name: configuracoes
+    label: Categorias
+    delete: false
+    editor:
+      preview: false
+    files:
+      - name: categorias
+        label: Categorias jurídicas
+        file: content/categorias.json
+        fields:
+          - name: categorias
+            label: Categorias
+            label_singular: Categoria
+            widget: list
+            summary: "{{fields.nome}}"
+            fields:
+              - { name: nome, label: Nome, widget: string }
+              - name: slug
+                label: Identificador
+                widget: string
+                hint: "Usado no filtro e no endereço (?categoria=...). Não altere depois de usar em artigos."
+                pattern: ['^[a-z0-9]+(-[a-z0-9]+)*$', "Use apenas letras minúsculas sem acento, números e hífens."]
+              - { name: descricao, label: Descrição, widget: string, required: false }
+              - name: area
+                label: Página de atuação vinculada
+                widget: select
+                required: false
+                options:
+                  - { label: Nenhuma, value: "" }
+                  - { label: Defesa do Produtor Rural, value: defesa-do-produtor-rural }
+                  - { label: Direito Bancário, value: direito-bancario }
+                  - { label: Direito da Saúde, value: direito-da-saude }
+                  - { label: Direito Previdenciário, value: direito-previdenciario }
+                  - { label: Direito de Família, value: direito-de-familia }
+                  - { label: Inventário e Sucessões, value: inventario-e-sucessoes }
+                  - { label: Mandado de Segurança, value: mandado-de-seguranca }

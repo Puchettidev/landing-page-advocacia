@@ -2,14 +2,24 @@
   "name": "acp-site-tools",
   "private": true,
   "type": "module",
-  "description": "Ferramentas locais para gerar o site estático (não são usadas em produção).",
+  "description": "Ferramentas para gerar o site estático (usadas localmente e no build da Vercel).",
   "scripts": {
     "images": "node images.mjs",
     "favicons": "node favicons.mjs",
     "build": "node build.mjs",
-    "serve": "node serve.mjs"
+    "build:drafts": "node build.mjs --drafts",
+    "build:dist": "node build.mjs --dist",
+    "check": "node check.mjs",
+    "serve": "node serve.mjs",
+    "cms": "npx decap-server"
   },
   "devDependencies": {
     "sharp": "0.33.5"
+  },
+  "dependencies": {
+    "marked": "18.3.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
